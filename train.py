@@ -55,7 +55,7 @@ if __name__ == "__main__":
         model=AdjacencyFlows,
         weight_init=weight_init
     )
-    
+
     train_loader, test_loader = get_datasets()
 
     network, optimiser, scheduler = create_model_and_optimiser_sche(config)
@@ -110,4 +110,13 @@ if __name__ == "__main__":
                         loss_step = 0
                         
             scheduler.step()
+            if epoch % 3 == 0:
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': network.state_dict(),
+                'optimizer_state_dict': optimiser.state_dict(),
+                'scheduler_state_dict': scheduler.state_dict(),
+                }, f"model_checkpoint_{epoch}.pt")
+            
+                wandb.save(f"model_checkpoint_{epoch}.pt")
 
