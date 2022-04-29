@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 from einops.layers.torch import Rearrange
-from dequantization import Dequantization
+from models.dequantization import Dequantization
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

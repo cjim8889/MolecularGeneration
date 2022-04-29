@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch
 import numpy as np
 from tqdm.notebook import trange, tqdm
-from models import AdjacencyFlows
+from models.flows import AdjacencyFlows
+from utils.datasets import get_datasets
 import wandb
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,6 +55,8 @@ if __name__ == "__main__":
         model=AdjacencyFlows,
         weight_init=weight_init
     )
+    
+    train_loader, test_loader = get_datasets()
 
     network, optimiser, scheduler = create_model_and_optimiser_sche(config)
     base = torch.distributions.Normal(loc=0., scale=1.)
