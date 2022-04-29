@@ -2,7 +2,7 @@ import math
 import torch.nn as nn
 import torch
 import numpy as np
-from tqdm.notebook import trange, tqdm
+# from tqdm.notebook import trange, tqdm
 from models.flows import AdjacencyFlows
 from utils.datasets import get_datasets
 import wandb
@@ -71,43 +71,43 @@ if __name__ == "__main__":
             loss_ep_train = 0
             network.train()
 
-            with tqdm(train_loader, unit="batch") as tepoch: 
-                for idx, batch_data in enumerate(tepoch):
+            # with tqdm(train_loader, unit="batch") as tepoch: 
+            for idx, batch_data in enumerate(train_loader):
 
-                    adj = batch_data.adj
+                adj = batch_data.adj
 
-                    adj_t = adj.view(adj.shape[0] * 29 * 29, -1)
-                    adj_t[torch.logical_not(adj_t.bool()).all(dim=1)] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
+                adj_t = adj.view(adj.shape[0] * 29 * 29, -1)
+                adj_t[torch.logical_not(adj_t.bool()).all(dim=1)] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
 
-                    input = adj_t.view(*adj.shape)
-                    input = input.to(device)
+                input = adj_t.view(*adj.shape)
+                input = input.to(device)
 
-                    optimiser.zero_grad(set_to_none=True)
+                optimiser.zero_grad(set_to_none=True)
 
-                    z, log_det = network(input)
-                    log_prob = torch.sum(base.log_prob(z), dim=[1, 2, 3, 4])
+                z, log_det = network(input)
+                log_prob = torch.sum(base.log_prob(z), dim=[1, 2, 3, 4])
 
-                    loss = criterion(log_prob, log_det)
-                    loss.backward()
+                loss = criterion(log_prob, log_det)
+                loss.backward()
 
-                    nn.utils.clip_grad_norm_(network.parameters(), 1)
-                    optimiser.step()
+                nn.utils.clip_grad_norm_(network.parameters(), 1)
+                optimiser.step()
 
-                    loss_step += loss
-                    loss_ep_train += loss
+                loss_step += loss
+                loss_ep_train += loss
 
 
+                
+                step += 1
+
+                if idx % 5 == 0:
+                    ll = (loss_step / 5.).item()
+                    wandb.log({"epoch": epoch, "NLL": ll}, step=step)
+
+                    # tepoch.set_description(f"Epoch {epoch}")
+                    # tepoch.set_postfix(Loss=ll)
                     
-                    step += 1
-
-                    if idx % 5 == 0:
-                        ll = (loss_step / 5.).item()
-                        wandb.log({"epoch": epoch, "NLL": ll}, step=step)
-
-                        tepoch.set_description(f"Epoch {epoch}")
-                        tepoch.set_postfix(Loss=ll)
-                        
-                        loss_step = 0
+                    loss_step = 0
                         
             scheduler.step()
             if epoch % 3 == 0:
