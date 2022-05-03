@@ -74,14 +74,15 @@ class ToDense(BaseTransform):
         return f'{self.__class__.__name__}(num_nodes={self.num_nodes})'
 
 
-def get_datasets():
+def get_datasets(batch_size=128, shuffle=True, num_workers=4):
+    
     transform = T.Compose([ToDense(29)])
     dataset = QM9(root="./qm9-datasets", transform=transform)
 
     transformed_x = dataset.data.x[:, :6]
     dataset.data.x = transformed_x
 
-    train_loader = DenseDataLoader(dataset[:int(len(dataset) * 0.8)], batch_size=128)
-    test_loader = DenseDataLoader(dataset[int(len(dataset) * 0.8):], batch_size=128)
+    train_loader = DenseDataLoader(dataset[:int(len(dataset) * 0.8)], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test_loader = DenseDataLoader(dataset[int(len(dataset) * 0.8):], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
     return train_loader, test_loader
