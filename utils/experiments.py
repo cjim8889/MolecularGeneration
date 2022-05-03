@@ -95,7 +95,7 @@ class ArgmaxAdjacencyExp:
                         loss_step = 0
 
                 self.scheduler.step()
-                wandb.log({"NLL/Epoch": loss_ep_train / len(self.train_loader)}, step=epoch)
+                wandb.log({"NLL/Epoch": (loss_ep_train / len(self.train_loader)).item()}, step=epoch)
                 if epoch % 3 == 0:
                     torch.save({
                     'epoch': epoch,
