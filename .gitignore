@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 wandb/
-qm9-datasets/
+*qm9-datasets/
 # C extensions
 *.so
 

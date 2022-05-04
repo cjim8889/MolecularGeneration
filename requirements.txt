@@ -5,3 +5,4 @@ git+https://github.com/pyg-team/pytorch_geometric.git
 git+https://github.com/didriknielsen/survae_flows.git
 einops
 wandb
+rdkit-pypi
