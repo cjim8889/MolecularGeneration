@@ -46,7 +46,7 @@ class ToDenseAdjV2(BaseTransform):
         tmp = torch.ones(data.adj.shape[0], data.adj.shape[1], 1) * 0.5
 
         data.adj = torch.cat((tmp, data.adj[..., :-1]), dim=-1).argmax(dim=-1)
-        # data.adj = data.adj[torch.tril_indices(9,9).unbind()].long()
+        data.adj = data.adj[torch.tril_indices(9,9).unbind()].long()
 
 
         data.edge_index = None
