@@ -11,6 +11,11 @@ parser.add_argument("--epochs", help="Number of epochs", type=int, default=100)
 parser.add_argument("--batch_size", help="Batch size", type=int, default=128)
 parser.add_argument("--block_length", help="Block length t parameter for V2 experiments", type=int, default=12)
 
+parser.add_argument("--optimiser", help="Optimiser", type=str, default="Adam")
+parser.add_argument("--lr", help="Learning rate", type=float, default=1e-03)
+parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0.0)
+
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def weight_init(m):
@@ -26,8 +31,9 @@ if __name__ == "__main__":
         config = dict(
             epochs=args.epochs,
             batch_size=args.batch_size,
-            optimiser="Adam",
-            learning_rate=1e-03,
+            optimiser=args.optimiser,
+            learning_rate=args.lr,
+            weight_decay=args.weight_decay,
             scheduler="StepLR",
             scheduler_gamma=0.99,
             scheduler_step=1,
@@ -44,8 +50,9 @@ if __name__ == "__main__":
         config = dict(
             epochs=args.epochs,
             batch_size=args.batch_size,
-            optimiser="Adam",
-            learning_rate=4e-04,
+            optimiser=args.optimiser,
+            learning_rate=args.lr,
+            weight_decay=args.weight_decay,
             scheduler="StepLR",
             scheduler_gamma=0.98,
             scheduler_step=1,

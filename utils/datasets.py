@@ -1,16 +1,8 @@
-from curses import nonl
 from torch_geometric.transforms import BaseTransform
-import torch.nn as nn
-import torch_geometric
 from torch_geometric.datasets import QM9
 import torch_geometric.transforms as T
 from .loader import ModifiedDenseDataLoader
-# from torch_geometric.loader import DataLoader, DenseDataLoader
-# from torch.utils.data import DataLoader
 import torch
-from torch_sparse import matmul, SparseTensor, spmm
-from torch_scatter import segment_sum_coo, segment_coo, scatter
-import numpy as np
 from .qm9 import ModifiedQM9
 
 # import rdkit
@@ -141,10 +133,11 @@ class ToDenseAdjV1(BaseTransform):
         return f'{self.__class__.__name__}(num_nodes={self.num_nodes})'
 
 
-def get_datasets(type="mqm9", batch_size=128, shuffle=False, num_workers=4):
+def get_datasets(type="mqm9", batch_size=128, shuffle=True, num_workers=4):
+
     if type == "mqm9":
         # Modified QM9 Dataset where all hydrogen atoms are removed
-        # Max_num_nodes = 9
+        # Max_num_nodes: 9
         transform = T.Compose([ToDenseAdjV2(num_nodes=9)])
         dataset = ModifiedQM9(root="./mqm9-datasets", pre_transform=transform)
 
