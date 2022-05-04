@@ -29,7 +29,7 @@ class ContextNet(nn.Module):
         return self.net(x)
 
 class ArgmaxFlow(nn.Module):
-    def __init__(self, context_size=8, num_classes=4, embedding_dim=7, hidden_dim=128, max_nodes=9, t=12):
+    def __init__(self, context_size=8, num_classes=4, embedding_dim=7, hidden_dim=128, max_nodes=9, t=12, inverted_mask=False):
         super().__init__()
 
         self.transforms = nn.ModuleList()
