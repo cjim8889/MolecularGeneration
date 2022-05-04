@@ -12,7 +12,7 @@ def create_model_and_optimiser_sche(config):
         model = config['model']()
         model = model.to(device)
     elif config['flow'] == "ArgmaxAdjV2":
-        model = config['model'](t=config['t'])
+        model = config['model'](t=config['t'], inverted_mask=config['inverted_mask'])
         model = model.to(device)
     elif config['flow'] == "Coupling":
         model = config['model'](t=config['t'], affine=config['affine'])
@@ -30,7 +30,7 @@ def create_model_and_optimiser_sche(config):
         optimiser = torch.optim.AdamW(model.parameters(), lr=config["learning_rate"], weight_decay=config["weight_decay"])
     else:
         raise ValueError(f"Unknown optimiser: {config['optimiser']}")
-        
+
     scheduler = None
     if "scheduler" in config:
         if config["scheduler"] == "StepLR":

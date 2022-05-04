@@ -48,7 +48,7 @@ class ConditionalAdjacencyBlockFlow(ConditionalBijection):
         # context: B x context_size x 45 x embedding_dim
         for idx in range(0, max_nodes, self.step_size):
             ar_net = ConditionalARNet(embedding_dim=embedding_dim, context_size=context_size, hidden_dim=hidden_dim)
-            tr = MaskedConditionalCouplingFlow(ar_net, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, inverted_mask=False))
+            tr = MaskedConditionalCouplingFlow(ar_net, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
             self.transforms.append(tr)
 
 

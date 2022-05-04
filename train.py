@@ -14,7 +14,7 @@ parser.add_argument("--block_length", help="Block length t parameter for V2 expe
 parser.add_argument("--optimiser", help="Optimiser", type=str, default="Adam")
 parser.add_argument("--lr", help="Learning rate", type=float, default=1e-03)
 parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0.0)
-
+parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -60,13 +60,14 @@ if __name__ == "__main__":
             dataset="MQM9",
             architecture="Flow",
             weight_init=weight_init,
-            t=args.block_length
+            t=args.block_length,
+            inverted_mask=args.invert_mask
         )
 
         exp = ArgmaxAdjacencyV2Exp(config)
 
 
-    exp.train()
+    # exp.train()
 
 
 
