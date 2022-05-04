@@ -9,7 +9,7 @@ import torch
 from torch_sparse import matmul, SparseTensor, spmm
 from torch_scatter import segment_sum_coo, segment_coo, scatter
 import numpy as np
-from qm9 import ModifiedQM9
+from .qm9 import ModifiedQM9
 
 # import rdkit
 
@@ -44,7 +44,7 @@ class ToDenseAdjV2(BaseTransform):
         tmp = torch.ones(data.adj.shape[0], data.adj.shape[1], 1) * 0.5
 
         data.adj = torch.cat((tmp, data.adj[..., :-1]), dim=-1).argmax(dim=-1)
-        data.adj = torch.tril(data.adj)
+        data.adj = data.adj[torch.tril_indices(9,9).unbind()]
 
         data.edge_index = None
         data.edge_attr = None

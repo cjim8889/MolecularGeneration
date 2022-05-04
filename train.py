@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import argparse
-from utils import ArgmaxAdjacencyExp
+from utils import ArgmaxAdjacencyExp, ArgmaxAdjacencyV2Exp
 
 
 parser = argparse.ArgumentParser(description="Molecular Generation MSc Project")
@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description="Molecular Generation MSc Project")
 parser.add_argument("--type", help="Type of experiments e.g. argmaxadj")
 parser.add_argument("--epochs", help="Number of epochs", type=int, default=100)
 parser.add_argument("--batch_size", help="Batch size", type=int, default=128)
+parser.add_argument("--block_length", help="Block length t parameter for V2 experiments", type=int, default=12)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -37,6 +38,25 @@ if __name__ == "__main__":
         )
 
         exp = ArgmaxAdjacencyExp(config)
+
+    elif args.type == "argmaxadjv2":
+
+        config = dict(
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            optimiser="Adam",
+            learning_rate=4e-04,
+            scheduler="StepLR",
+            scheduler_gamma=0.98,
+            scheduler_step=1,
+            bpd=False,
+            dataset="MQM9",
+            architecture="Flow",
+            weight_init=weight_init,
+            t=args.block_length
+        )
+
+        exp = ArgmaxAdjacencyV2Exp(config)
 
 
     exp.train()

@@ -1,57 +1,31 @@
 from .datasets import get_datasets
-from models.argmaxflow.model import ArgmaxFlow
+from models.argmaxflowv2.model import ArgmaxFlow
+from .experiments import create_model_and_optimiser_sche, argmax_criterion
+
 
 import wandb
 import torch
 from torch import nn
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def create_model_and_optimiser_sche(config):
-    
-    if config['flow'] == "ArgmaxAdj":
-        model = config['model']()
-        model = model.to(device)
-    if config['flow'] == "ArgmaxAdjV2":
-        model = config['model'](t=config['t'])
-        model = model.to(device)
-    else:
-        model = config['model'](t=config['t'], affine=config['affine'])
-        model = model.to(device)
-    
-    if "weight_init" in config:
-        model.apply(config["weight_init"])
 
-    optimiser = None
-    if config['optimiser'] == "Adam":
-        optimiser = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
 
-    scheduler = None
-    if "scheduler" in config:
-        if config["scheduler"] == "StepLR":
-            scheduler = torch.optim.lr_scheduler.StepLR(optimiser, step_size=config['scheduler_step'], gamma=config["scheduler_gamma"])
-
-    return model, optimiser, scheduler
-
-@torch.jit.script
-def argmax_criterion(log_prob, log_det):
-    return - torch.mean(log_prob + log_det)
-
-class ArgmaxAdjacencyExp:
+class ArgmaxAdjacencyV2Exp:
     def __init__(self, config) -> None:
         super().__init__()
 
         self.config = config
-        self.config['flow'] = "ArgmaxAdj" 
+        self.config['flow'] = "ArgmaxAdjV2" 
         self.config['model'] = ArgmaxFlow
 
         self.batch_size = self.config["batch_size"] if "batch_size" in self.config else 128
 
-        self.train_loader, self.test_loader = get_datasets(self.batch_size)
+        self.train_loader, self.test_loader = get_datasets(type="mqm9", batch_size=self.batch_size)
         self.network, self.optimiser, self.scheduler = create_model_and_optimiser_sche(self.config)
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        self.network(torch.zeros(1, 29, 29, device=device).long())
+        self.network(torch.zeros(1, 45, device=device).long())
         print(f"Model Parameters: {sum([p.numel() for p in self.network.parameters()])}")
 
         with wandb.init(project="molecule-flow", config=self.config):
@@ -64,14 +38,7 @@ class ArgmaxAdjacencyExp:
                 for idx, batch_data in enumerate(self.train_loader):
 
                     adj = batch_data.adj
-
-                    adj_t = adj.view(adj.shape[0] * 29 * 29, -1)
-                    adj_t[torch.logical_not(adj_t.bool()).all(dim=1)] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
-
-                    input = adj_t.view(*adj.shape)
-                    input = input.argmax(dim=-1)
-
-                    input = input.to(device)
+                    input = adj.to(device)
 
                     self.optimiser.zero_grad(set_to_none=True)
 
