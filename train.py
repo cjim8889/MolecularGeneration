@@ -67,7 +67,7 @@ if __name__ == "__main__":
         exp = ArgmaxAdjacencyV2Exp(config)
 
 
-    # exp.train()
+    exp.train()
 
 
 
