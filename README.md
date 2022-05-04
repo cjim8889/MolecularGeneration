@@ -2,7 +2,7 @@
 
 ## About this Repo
 
-This is the main code base for the Research Project: __Discrete Time E(n) Equivariant Normalising Flows for Molecular Generation__ at Imperial.  
+This is the main code base for the Research Project: __Discrete Time E(n) Equivariant Normalising Flows for Molecular Generation__ at Imperial. This project aims to improve on the results of E(n) Equivariant Normalising Flows from Satorras et al. 2021.  
 
 This code base is breaking and constantly changing, excersise caution when using it!  
 
