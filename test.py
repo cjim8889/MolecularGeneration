@@ -6,25 +6,45 @@ from survae.flows import ConditionalInverseFlow
 from torch import embedding, nn
 from models.argmaxflowv2 import create_mask
 from models.argmaxflowv2 import ArgmaxSurjection, ArgmaxFlow
+from utils.qm9 import ModifiedQM9
+import torch_geometric.transforms as T
+
+from utils import ToDenseAdjV2
+from utils import get_datasets
 
 if __name__ == '__main__':
     
-    x = torch.zeros(1, 45).long()
-    x[0, 5:10] = 1
+    # transform = T.Compose([ToDenseAdjV2(num_nodes=9)])
+    # dataset = ModifiedQM9(root="./mqm9-datasets", pre_transform=transform)
 
-    model = ArgmaxFlow(
-        context_size=8,
-        num_classes=4,
-        embedding_dim=7,
-        hidden_dim=128,
-        max_nodes=9,
-        t=6
-    )
 
-    z, _ = model(x)
-    print(z.shape)
+    # for data in dataset:
+    #     if data.adj.shape[0] != 45:
+    #         print(data)
+    #     if data.x.shape[0] != 9:
+    #         print(data)
+    train_loader, test_loader = get_datasets(type="mqm9", batch_size=128)
+    
+    print("Retrieved train_loader")
+    for batch in train_loader:
+        print(batch.adj.shape)
 
-    print(sum([p.numel() for p in model.parameters()]))
+    # x = torch.zeros(1, 45).long()
+    # x[0, 5:10] = 1
+
+    # model = ArgmaxFlow(
+    #     context_size=8,
+    #     num_classes=4,
+    #     embedding_dim=7,
+    #     hidden_dim=128,
+    #     max_nodes=9,
+    #     t=6
+    # )
+
+    # z, _ = model(x)
+    # print(z.shape)
+
+    # print(sum([p.numel() for p in model.parameters()]))
 
     # context_size = 1
     # c = ContextNet(context_size=context_size, num_classes=4, embedding_dim=7)

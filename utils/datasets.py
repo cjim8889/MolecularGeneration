@@ -4,7 +4,9 @@ import torch.nn as nn
 import torch_geometric
 from torch_geometric.datasets import QM9
 import torch_geometric.transforms as T
-from torch_geometric.loader import DataLoader, DenseDataLoader
+from .loader import ModifiedDenseDataLoader
+# from torch_geometric.loader import DataLoader, DenseDataLoader
+# from torch.utils.data import DataLoader
 import torch
 from torch_sparse import matmul, SparseTensor, spmm
 from torch_scatter import segment_sum_coo, segment_coo, scatter
@@ -44,7 +46,8 @@ class ToDenseAdjV2(BaseTransform):
         tmp = torch.ones(data.adj.shape[0], data.adj.shape[1], 1) * 0.5
 
         data.adj = torch.cat((tmp, data.adj[..., :-1]), dim=-1).argmax(dim=-1)
-        data.adj = data.adj[torch.tril_indices(9,9).unbind()]
+        # data.adj = data.adj[torch.tril_indices(9,9).unbind()].long()
+
 
         data.edge_index = None
         data.edge_attr = None
@@ -106,7 +109,7 @@ class ToDenseAdjV1(BaseTransform):
 
         tmp = torch.ones(data.adj.shape[0], data.adj.shape[1], 1) * 0.5
 
-        data.adj = torch.cat((tmp, data.adj[..., :-1]), dim=-1).argmax(dim=-1)
+        data.adj = torch.cat((tmp, data.adj[..., :-1]), dim=-1).argmax(dim=-1).long()
 
         data.edge_index = None
         data.edge_attr = None
@@ -138,11 +141,11 @@ class ToDenseAdjV1(BaseTransform):
         return f'{self.__class__.__name__}(num_nodes={self.num_nodes})'
 
 
-def get_datasets(type="mqm9", batch_size=128, shuffle=True, num_workers=4):
+def get_datasets(type="mqm9", batch_size=128, shuffle=False, num_workers=4):
     if type == "mqm9":
         # Modified QM9 Dataset where all hydrogen atoms are removed
         # Max_num_nodes = 9
-        transform = T.Compose([ToDenseAdjV2(9)])
+        transform = T.Compose([ToDenseAdjV2(num_nodes=9)])
         dataset = ModifiedQM9(root="./mqm9-datasets", pre_transform=transform)
 
         transformed_x = dataset.data.x[:, :6]
@@ -156,8 +159,8 @@ def get_datasets(type="mqm9", batch_size=128, shuffle=True, num_workers=4):
         transformed_x = dataset.data.x[:, :6]
         dataset.data.x = transformed_x
 
-    train_loader = DenseDataLoader(dataset[:int(len(dataset) * 0.8)], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    test_loader = DenseDataLoader(dataset[int(len(dataset) * 0.8):], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    train_loader = ModifiedDenseDataLoader(dataset[:int(len(dataset) * 0.8)], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test_loader = ModifiedDenseDataLoader(dataset[int(len(dataset) * 0.8):], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
     return train_loader, test_loader
 
