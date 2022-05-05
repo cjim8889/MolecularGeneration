@@ -65,13 +65,14 @@ class ArgmaxAdjacencyV2Exp:
 
                 self.scheduler.step()
                 wandb.log({"NLL/Epoch": (loss_ep_train / len(self.train_loader)).item()}, step=epoch)
-                if epoch % 3 == 0:
-                    torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': self.network.state_dict(),
-                    'optimizer_state_dict': self.optimiser.state_dict(),
-                    'scheduler_state_dict': self.scheduler.state_dict(),
-                    }, f"model_checkpoint_{epoch}.pt")
-                
-                    wandb.save(f"model_checkpoint_{epoch}.pt")
+                if self.config['upload']:
+                    if epoch % self.config['upload_interval'] == 0:
+                        torch.save({
+                        'epoch': epoch,
+                        'model_state_dict': self.network.state_dict(),
+                        'optimizer_state_dict': self.optimiser.state_dict(),
+                        'scheduler_state_dict': self.scheduler.state_dict(),
+                        }, f"model_checkpoint_{epoch}.pt")
+                    
+                        wandb.save(f"model_checkpoint_{epoch}.pt")
 
