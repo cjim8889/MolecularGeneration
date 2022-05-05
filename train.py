@@ -14,6 +14,8 @@ parser.add_argument("--block_length", help="Block length t parameter for V2 expe
 parser.add_argument("--optimiser", help="Optimiser", type=str, default="Adam")
 parser.add_argument("--lr", help="Learning rate", type=float, default=1e-03)
 parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0.0)
+parser.add_argument("--momentum", help="Momentum for the SGD optimiser", type=float, default=0.9)
+
 parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
 
 parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
@@ -39,6 +41,7 @@ if __name__ == "__main__":
             optimiser=args.optimiser,
             learning_rate=args.lr,
             weight_decay=args.weight_decay,
+            momentum=args.momentum,
             scheduler=args.scheduler,
             scheduler_gamma=args.scheduler_gamma,
             scheduler_step=args.scheduler_step,
@@ -59,6 +62,7 @@ if __name__ == "__main__":
             learning_rate=args.lr,
             weight_decay=args.weight_decay,
             scheduler=args.scheduler,
+            momentum=args.momentum,
             scheduler_gamma=args.scheduler_gamma,
             scheduler_step=args.scheduler_step,
             bpd=False,

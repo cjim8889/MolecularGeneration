@@ -28,6 +28,8 @@ def create_model_and_optimiser_sche(config):
         optimiser = torch.optim.Adam(model.parameters(), lr=config["learning_rate"], weight_decay=config["weight_decay"])
     elif config["optimiser"] == "AdamW":
         optimiser = torch.optim.AdamW(model.parameters(), lr=config["learning_rate"], weight_decay=config["weight_decay"])
+    elif config["optimiser"] == "SGD":
+        optimiser = torch.optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"])
     else:
         raise ValueError(f"Unknown optimiser: {config['optimiser']}")
 
