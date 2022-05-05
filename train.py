@@ -16,6 +16,11 @@ parser.add_argument("--lr", help="Learning rate", type=float, default=1e-03)
 parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0.0)
 parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
 
+parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
+parser.add_argument("--scheduler_step", help="Scheduler step", type=int, default=3)
+parser.add_argument("--scheduler_gamma", help="Scheduler gamma", type=float, default=0.96)
+
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def weight_init(m):
@@ -34,9 +39,9 @@ if __name__ == "__main__":
             optimiser=args.optimiser,
             learning_rate=args.lr,
             weight_decay=args.weight_decay,
-            scheduler="StepLR",
-            scheduler_gamma=0.99,
-            scheduler_step=1,
+            scheduler=args.scheduler,
+            scheduler_gamma=args.schedule_gamma,
+            scheduler_step=args.scheduler_step,
             bpd=False,
             dataset="QM9",
             architecture="Flow",
@@ -53,9 +58,9 @@ if __name__ == "__main__":
             optimiser=args.optimiser,
             learning_rate=args.lr,
             weight_decay=args.weight_decay,
-            scheduler="StepLR",
-            scheduler_gamma=0.98,
-            scheduler_step=1,
+            scheduler=args.scheduler,
+            scheduler_gamma=args.schedule_gamma,
+            scheduler_step=args.scheduler_step,
             bpd=False,
             dataset="MQM9",
             architecture="Flow",
