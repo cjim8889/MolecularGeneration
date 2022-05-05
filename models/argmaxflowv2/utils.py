@@ -2,7 +2,7 @@ import torch
 
 def create_mask(range, max_nodes, invert=False):
 
-    r = torch.arange(9, -1, step=-1)
+    r = torch.arange(max_nodes, -1, step=-1)
 
     mask = torch.zeros(r.sum(), dtype=torch.float32)
 

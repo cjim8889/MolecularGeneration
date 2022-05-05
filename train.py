@@ -22,6 +22,8 @@ parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
 parser.add_argument("--scheduler_step", help="Scheduler step", type=int, default=3)
 parser.add_argument("--scheduler_gamma", help="Scheduler gamma", type=float, default=0.96)
 
+parser.add_argument("--upload", help="Upload to wandb", type=bool, default=False)
+parser.add_argument("--upload_interval", help="Upload to wandb every n epochs", type=int, default=10)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -48,7 +50,9 @@ if __name__ == "__main__":
             bpd=False,
             dataset="QM9",
             architecture="Flow",
-            weight_init=weight_init
+            weight_init=weight_init,
+            upload=args.upload,
+            upload_interval=args.upload_interval,
         )
 
         exp = ArgmaxAdjacencyExp(config)
@@ -70,7 +74,9 @@ if __name__ == "__main__":
             architecture="Flow",
             weight_init=weight_init,
             t=args.block_length,
-            inverted_mask=args.invert_mask
+            inverted_mask=args.invert_mask,
+            upload=args.upload,
+            upload_interval=args.upload_interval,
         )
 
         exp = ArgmaxAdjacencyV2Exp(config)
