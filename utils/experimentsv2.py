@@ -1,6 +1,6 @@
 from .datasets import get_datasets
 from models.argmaxflowv2.model import ArgmaxFlow
-from .experiments import create_model_and_optimiser_sche, argmax_criterion
+from .utils import create_model_and_optimiser_sche, argmax_criterion
 
 
 import wandb
