@@ -39,9 +39,9 @@ class ConditionalARNet(nn.Module):
 
 
 class ConditionalAdjacencyBlockFlow(ConditionalBijection):
-    def __init__(self, max_nodes=9, embedding_dim=7, context_size=1, hidden_dim=128, inverted_mask=False):
+    def __init__(self, max_nodes=9, embedding_dim=7, context_size=1, hidden_dim=128, mask_ratio=2., inverted_mask=False):
         super(ConditionalAdjacencyBlockFlow, self).__init__()
-        self.step_size = int(np.ceil(max_nodes / 5.))
+        self.step_size = int(np.ceil(max_nodes / mask_ratio))
         self.transforms = nn.ModuleList()
 
 

@@ -13,7 +13,7 @@ def create_model_and_optimiser_sche(config):
         model = config['model']()
         model = model.to(device)
     elif config['flow'] == "ArgmaxAdjV2":
-        model = config['model'](t=config['t'], hidden_dim=config['hidden_dim'], inverted_mask=config['inverted_mask'])
+        model = config['model'](t=config['t'], hidden_dim=config['hidden_dim'], mask_ratio=config['mask_ratio'] ,inverted_mask=config['inverted_mask'])
         model = model.to(device)
     elif config['flow'] == "Coupling":
         model = config['model'](t=config['t'], affine=config['affine'])

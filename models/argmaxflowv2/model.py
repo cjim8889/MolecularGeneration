@@ -29,7 +29,15 @@ class ContextNet(nn.Module):
         return self.net(x)
 
 class ArgmaxFlow(nn.Module):
-    def __init__(self, context_size=8, num_classes=4, embedding_dim=7, hidden_dim=128, max_nodes=9, t=12, inverted_mask=False):
+    def __init__(self, context_size=8,
+                    num_classes=4,
+                    embedding_dim=7, 
+                    hidden_dim=128, 
+                    max_nodes=9, 
+                    t=12,
+                    mask_ratio=1.,
+                    inverted_mask=False):
+
         super().__init__()
 
         self.transforms = nn.ModuleList()
@@ -43,7 +51,7 @@ class ArgmaxFlow(nn.Module):
             nn.Conv2d(context_size, 2, kernel_size=3, stride=1, padding=1)
         ), split_dim=1)
 
-        transform = [ConditionalAdjacencyBlockFlow(max_nodes=max_nodes, embedding_dim=embedding_dim, context_size=context_size) for _ in range(t // 2)]
+        transform = [ConditionalAdjacencyBlockFlow(max_nodes=max_nodes, embedding_dim=embedding_dim, context_size=context_size, inverted_mask=inverted_mask, mask_ratio=mask_ratio) for _ in range(t // 2)]
         conditional_flow = ConditionalInverseFlow(base_dist=encoder_base, context_init=context_net, transforms=transform)
 
         surjection = ArgmaxSurjection(conditional_flow, num_classes)
@@ -51,7 +59,7 @@ class ArgmaxFlow(nn.Module):
         self.transforms.append(surjection)
 
         for i in range(t):
-            flow = AdjacencyBlockFlow(hidden_dim=hidden_dim)
+            flow = AdjacencyBlockFlow(hidden_dim=hidden_dim, inverted_mask=inverted_mask, mask_ratio=mask_ratio)
 
             self.transforms.append(flow)
 

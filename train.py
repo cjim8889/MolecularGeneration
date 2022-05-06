@@ -20,7 +20,7 @@ parser.add_argument("--momentum", help="Momentum for the SGD optimiser", type=fl
 
 parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
 parser.add_argument("--hidden_dim", help="Hidden dimension", type=int, default=64)
-
+parser.add_argument("--mask_ratio", help="Mask ratio", type=float, default=2.)
 
 parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
 parser.add_argument("--scheduler_step", help="Scheduler step", type=int, default=3)
@@ -82,12 +82,13 @@ if __name__ == "__main__":
             inverted_mask=args.invert_mask,
             upload=args.upload,
             upload_interval=args.upload_interval,
+            mask_ratio=args.mask_ratio,
         )
 
         exp = ArgmaxAdjacencyV2Exp(config)
 
 
-    exp.train()
+    # exp.train()
 
 
 

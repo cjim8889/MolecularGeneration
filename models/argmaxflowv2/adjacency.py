@@ -31,9 +31,9 @@ class ARNet(nn.Module):
 
 
 class AdjacencyBlockFlow(Bijection):
-    def __init__(self, max_nodes=9, step_ratio=5., input_channel=1, hidden_dim=128, inverted_mask=False):
+    def __init__(self, max_nodes=9, mask_ratio=5., input_channel=1, hidden_dim=128, inverted_mask=False):
         super(AdjacencyBlockFlow, self).__init__()
-        self.step_size = int(np.ceil(max_nodes / step_ratio))
+        self.step_size = int(np.ceil(max_nodes / mask_ratio))
         self.transforms = nn.ModuleList()
 
         for idx in range(0, max_nodes, self.step_size):
