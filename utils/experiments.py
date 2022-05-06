@@ -5,9 +5,7 @@ import wandb
 import torch
 from torch import nn
 from .utils import create_model_and_optimiser_sche, argmax_criterion
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 
 class ArgmaxAdjacencyExp:

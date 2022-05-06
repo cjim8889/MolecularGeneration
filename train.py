@@ -1,6 +1,8 @@
 import torch.nn as nn
 import torch
 import argparse
+
+from yaml import parse
 from utils import ArgmaxAdjacencyExp, ArgmaxAdjacencyV2Exp
 
 
@@ -17,6 +19,8 @@ parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0
 parser.add_argument("--momentum", help="Momentum for the SGD optimiser", type=float, default=0.9)
 
 parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
+parser.add_argument("--hidden_dim", help="Hidden dimension", type=int, default=64)
+
 
 parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
 parser.add_argument("--scheduler_step", help="Scheduler step", type=int, default=3)
@@ -69,6 +73,7 @@ if __name__ == "__main__":
             momentum=args.momentum,
             scheduler_gamma=args.scheduler_gamma,
             scheduler_step=args.scheduler_step,
+            hidden_dim=args.hidden_dim,
             bpd=False,
             dataset="MQM9",
             architecture="Flow",

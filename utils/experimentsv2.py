@@ -17,6 +17,8 @@ class ArgmaxAdjacencyV2Exp:
         self.config = config
         self.config['flow'] = "ArgmaxAdjV2" 
         self.config['model'] = ArgmaxFlow
+        if "hidden_dim" not in self.config:
+            self.config['hidden_dim'] = 128
 
         self.batch_size = self.config["batch_size"] if "batch_size" in self.config else 128
 

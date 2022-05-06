@@ -43,8 +43,8 @@ class ArgmaxFlow(nn.Module):
             nn.Conv2d(context_size, 2, kernel_size=3, stride=1, padding=1)
         ), split_dim=1)
 
-        transform = ConditionalAdjacencyBlockFlow(max_nodes=max_nodes, embedding_dim=embedding_dim, context_size=context_size,)
-        conditional_flow = ConditionalInverseFlow(base_dist=encoder_base, context_init=context_net, transforms=[transform])
+        transform = [ConditionalAdjacencyBlockFlow(max_nodes=max_nodes, embedding_dim=embedding_dim, context_size=context_size) for _ in range(t // 2)]
+        conditional_flow = ConditionalInverseFlow(base_dist=encoder_base, context_init=context_net, transforms=transform)
 
         surjection = ArgmaxSurjection(conditional_flow, num_classes)
 

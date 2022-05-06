@@ -10,7 +10,7 @@ from utils.qm9 import ModifiedQM9
 import torch_geometric.transforms as T
 
 from utils import ToDenseAdjV2
-from utils import get_datasets
+from utils import get_datasets, create_model_and_optimiser_sche
 
 if __name__ == '__main__':
     
@@ -24,11 +24,42 @@ if __name__ == '__main__':
     #     if data.x.shape[0] != 9:
     #         print(data)
     train_loader, test_loader = get_datasets(type="mqm9", batch_size=128)
-    
-    print("Retrieved train_loader")
-    for batch in train_loader:
-        print(batch.adj.shape)
 
+    config = dict(
+            epochs=10,
+            batch_size=128,
+            optimiser="Adam",
+            learning_rate=1e-03,
+            weight_decay=1e-06,
+            momentum=0.9,
+            dataset="MQM9",
+            architecture="Flow",
+            flow="ArgmaxAdjV2",
+            model=ArgmaxFlow,
+            t=6,
+            inverted_mask=False,
+            upload=False,
+            upload_interval=2,
+        )
+
+
+    model, _, _ = create_model_and_optimiser_sche(config=config)
+    model.eval()
+
+    # batch = next(iter(train_loader))
+
+
+    # z, _ = model(batch.adj[:1])
+    # x, _ =model.inverse(z)
+
+
+    base = torch.distributions.Normal(loc=0., scale=1.)
+    # print(torch.allclose(x, batch.adj[:1]))
+
+    z = base.sample((1, 45, 4)).long()
+    generated_x, _ = model.inverse(z)
+
+    print(generated_x)
     # x = torch.zeros(1, 45).long()
     # x[0, 5:10] = 1
 
