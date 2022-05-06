@@ -8,11 +8,11 @@ from ..utils import create_mask
 
 class ConditionalARNet(nn.Module):
     
-    def __init__(self, embedding_dim=7, context_size=1, hidden_dim=64):
+    def __init__(self, embedding_dim=7, num_classes=5, context_size=1, hidden_dim=64):
         super().__init__()
         
         self.embed = nn.Sequential(
-            nn.Linear(embedding_dim, 4),
+            nn.Linear(embedding_dim, num_classes),
             nn.ReLU(),
         )
         self.net = nn.Sequential(
@@ -26,10 +26,10 @@ class ConditionalARNet(nn.Module):
             nn.ReLU(),
         )
 
-    # x: B x 1 x 45 x 4
+    # x: B x 1 x 45 x 5
     # context: B x C x 45 x embedding_dim
     def forward(self, x, context):
-        context = self.embed(context) # B x C x 45 x 4
+        context = self.embed(context) # B x C x 45 x 5
 
         z = torch.cat((x, context), dim=1)
         z = self.net(z)
@@ -39,7 +39,7 @@ class ConditionalARNet(nn.Module):
 
 
 class ConditionalAdjacencyBlockFlow(ConditionalBijection):
-    def __init__(self, max_nodes=9, embedding_dim=7, context_size=1, hidden_dim=128, mask_ratio=2., inverted_mask=False):
+    def __init__(self, max_nodes=9, embedding_dim=7, num_classes=5, context_size=1, hidden_dim=128, mask_ratio=2., inverted_mask=False):
         super(ConditionalAdjacencyBlockFlow, self).__init__()
         self.step_size = int(np.ceil(max_nodes / mask_ratio))
         self.transforms = nn.ModuleList()
@@ -47,7 +47,7 @@ class ConditionalAdjacencyBlockFlow(ConditionalBijection):
 
         # context: B x context_size x 45 x embedding_dim
         for idx in range(0, max_nodes, self.step_size):
-            ar_net = ConditionalARNet(embedding_dim=embedding_dim, context_size=context_size, hidden_dim=hidden_dim)
+            ar_net = ConditionalARNet(embedding_dim=embedding_dim, context_size=context_size, hidden_dim=hidden_dim, num_classes=num_classes)
             tr = MaskedConditionalCouplingFlow(ar_net, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
             self.transforms.append(tr)
 

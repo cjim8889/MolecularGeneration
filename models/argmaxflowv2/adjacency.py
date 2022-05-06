@@ -38,7 +38,7 @@ class AdjacencyBlockFlow(Bijection):
 
         for idx in range(0, max_nodes, self.step_size):
             ar_net = ARNet(hidden_dim=hidden_dim)
-            tr = MaskedCouplingFlow(ar_net, input_channel=1, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
+            tr = MaskedCouplingFlow(ar_net, input_channel=input_channel, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
             self.transforms.append(tr)
 
 
