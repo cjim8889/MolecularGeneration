@@ -29,7 +29,7 @@ class ArgmaxAdjacencyV2Exp:
     def train(self):
         self.network(torch.zeros(1, 45, device=device).long())
         print(f"Model Parameters: {sum([p.numel() for p in self.network.parameters()])}")
-
+        # print(self.network)
         with wandb.init(project="molecule-flow", config=self.config):
             step = 0
             for epoch in range(self.config['epochs']):
