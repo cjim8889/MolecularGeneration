@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import argparse
 
-from yaml import parse
 from utils import ArgmaxAdjacencyExp, ArgmaxAdjacencyV2Exp
 
 

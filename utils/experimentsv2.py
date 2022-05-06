@@ -42,7 +42,7 @@ class ArgmaxAdjacencyV2Exp:
                     adj = batch_data.adj
                     input = adj.to(device)
 
-                    self.optimiser.zero_grad(set_to_none=True)
+                    self.optimiser.zero_grad()
 
                     z, log_det = self.network(input)
                     log_prob = torch.sum(self.base.log_prob(z), dim=[1, 2, 3])
@@ -50,7 +50,7 @@ class ArgmaxAdjacencyV2Exp:
                     loss = argmax_criterion(log_prob, log_det)
                     loss.backward()
 
-                    nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+                    # nn.utils.clip_grad_norm_(self.network.parameters(), 1)
                     self.optimiser.step()
 
                     loss_step += loss

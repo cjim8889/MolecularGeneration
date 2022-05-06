@@ -40,6 +40,8 @@ if __name__ == '__main__':
             inverted_mask=False,
             upload=False,
             upload_interval=2,
+            hidden_dim=64,
+            mask_ratio=2.
         )
 
 
@@ -56,7 +58,10 @@ if __name__ == '__main__':
     base = torch.distributions.Normal(loc=0., scale=1.)
     # print(torch.allclose(x, batch.adj[:1]))
 
-    z = base.sample((1, 45, 4)).long()
+    z = base.sample((1, 1, 45, 4)).long()
+
+    # print(torch.sum(base.log_prob(z), dim=[1, 2, 3]))
+
     generated_x, _ = model.inverse(z)
 
     print(generated_x)
