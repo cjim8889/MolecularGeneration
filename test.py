@@ -8,6 +8,7 @@ from models.argmaxflowv2 import create_mask
 from models.argmaxflowv2 import ArgmaxSurjection, ArgmaxFlow
 from utils.qm9 import ModifiedQM9
 import torch_geometric.transforms as T
+from models.atomflow import AtomFlow
 
 from utils import ToDenseAdjV2
 from utils import get_datasets, create_model_and_optimiser_sche
@@ -26,7 +27,13 @@ if __name__ == '__main__':
     train_loader, test_loader = get_datasets(type="mqm9", batch_size=128)
 
     batch = next(iter(train_loader))
-    print(batch.adj[:10])
+
+    atomflow = AtomFlow(None)
+
+    z, _ = atomflow(batch.x)
+    x, _ = atomflow.inverse(z)
+
+    print(batch.x[0], "\n\n", x[0])
 
     # zeros = torch.zeros(45, dtype=torch.long)
     

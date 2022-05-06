@@ -53,13 +53,17 @@ class ToDenseAdjV2(BaseTransform):
             size = [num_nodes - data.x.size(0)] + list(data.x.size())[1:]
             data.x = torch.cat([data.x, data.x.new_zeros(size)], dim=0)
 
+            data.x = data.x[..., :6]
+
             categorical = data.x[..., :-1]
             ordinal = data.x[..., -1:]
 
-            tmp = torch.ones(categorical.shape[0], categorical.shape[1], 1) * 0.5
+            tmp = torch.ones(categorical.shape[0], 1) * 0.5
+            # print(tmp.shape, categorical.shape)
+
             categorical = torch.cat((tmp, categorical), dim=-1).argmax(dim=-1).long()
 
-            data.x = torch.cat([categorical, ordinal], dim=-1)
+            data.x = torch.cat([categorical.unsqueeze(1), ordinal], dim=-1)
 
         if data.pos is not None:
             size = [num_nodes - data.pos.size(0)] + list(data.pos.size())[1:]

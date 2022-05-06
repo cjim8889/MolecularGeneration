@@ -31,14 +31,14 @@ class ARNet(nn.Module):
 
 
 class AdjacencyBlockFlow(Bijection):
-    def __init__(self, max_nodes=9, mask_ratio=5., input_channel=1, hidden_dim=128, inverted_mask=False):
+    def __init__(self, max_nodes=9, mask_ratio=5., input_channel=1, hidden_dim=128, inverted_mask=False, mask_init=create_mask):
         super(AdjacencyBlockFlow, self).__init__()
         self.step_size = int(np.ceil(max_nodes / mask_ratio))
         self.transforms = nn.ModuleList()
 
         for idx in range(0, max_nodes, self.step_size):
             ar_net = ARNet(hidden_dim=hidden_dim)
-            tr = MaskedCouplingFlow(ar_net, input_channel=input_channel, mask=create_mask([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
+            tr = MaskedCouplingFlow(ar_net, input_channel=input_channel, mask=mask_init([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
             self.transforms.append(tr)
 
 

@@ -9,7 +9,7 @@ from torch import nn
 import torch
 
 class ContextNet(nn.Module):
-    def __init__(self, context_size=16, num_classes=4, embedding_dim=16, hidden_dim=32):
+    def __init__(self, context_size=16, num_classes=4, embedding_dim=7, hidden_dim=32):
         super(ContextNet, self).__init__()
         #Assume input B x 45
         self.net = nn.Sequential(

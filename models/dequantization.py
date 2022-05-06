@@ -27,13 +27,13 @@ class Dequantization(nn.Module):
 
     def inverse(self, z):
 
-        log_det = (-z-2*F.softplus(-z)).sum(dim=[1, 2, 3, 4])
+        log_det = (-z-2*F.softplus(-z)).sum(dim=[1])
         z = torch.sigmoid(z)
 
         z = z * self.quants
         log_det += torch.log(self.quants) * np.prod(z.shape[1:])
 
-        z = torch.floor(z).clamp(min=0, max=self.quants-1)
+        z = torch.floor(z).clamp(min=0, max=self.quants-1).to(torch.int64)
 
         return z, log_det
 
@@ -52,7 +52,7 @@ class Dequantization(nn.Module):
         log_det += torch.log(1 - self.alpha) * np.prod(z.shape[1:])
 
 
-        log_det += (-torch.log(z) - torch.log(1-z)).sum(dim=[1, 2, 3, 4])
+        log_det += (-torch.log(z) - torch.log(1-z)).sum(dim=[1])
         z = torch.logit(z, eps=1e-06)
 
 
