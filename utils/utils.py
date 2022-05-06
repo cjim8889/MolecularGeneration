@@ -1,12 +1,6 @@
 from torch import nn
 import torch
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-@torch.jit.script
-def argmax_criterion(log_prob, log_det):
-    return - torch.mean(log_prob + log_det)
-
 
 def create_model_and_optimiser_sche(config):
     
@@ -34,3 +28,10 @@ def create_model_and_optimiser_sche(config):
         optimiser = torch.optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"])
     else:
         raise ValueError(f"Unknown optimiser: {config['optimiser']}")
+
+    scheduler = None
+    if "scheduler" in config:
+        if config["scheduler"] == "StepLR":
+            scheduler = torch.optim.lr_scheduler.StepLR(optimiser, step_size=config['scheduler_step'], gamma=config["scheduler_gamma"])
+
+    return model, optimiser, scheduler
