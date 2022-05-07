@@ -1,4 +1,3 @@
-import imp
 import torch
 import torch.nn as nn
 from ..argmaxflowv2 import ContextNet, ConditionalNormal, ArgmaxSurjection, ConditionalAdjacencyBlockFlow
@@ -61,6 +60,5 @@ class AtomSurjection(Surjection):
         categorical, ldj_c = self.categorical_surjection.inverse(z_c)
         ordinal, ldj_o = self.ordinal_surjection.inverse(z_o)
 
-        print(categorical.shape, ordinal.shape)
-
-        return torch.cat([categorical, ordinal], dim=1).permute(0, 2, 1), ldj_c + ldj_o
+        # print(ldj_c.shape, ldj_o.shape)
+        return torch.cat([categorical, ordinal], dim=1).permute(0, 2, 1), 0.

@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import argparse
 
-from utils import ArgmaxAdjacencyExp, ArgmaxAdjacencyV2Exp
+from utils import ArgmaxAdjacencyExp, ArgmaxAdjacencyV2Exp, AtomExp
 
 
 parser = argparse.ArgumentParser(description="Molecular Generation MSc Project")
@@ -86,6 +86,31 @@ if __name__ == "__main__":
 
         exp = ArgmaxAdjacencyV2Exp(config)
 
+    elif args.type == "atom":
+
+        config = dict(
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            optimiser=args.optimiser,
+            learning_rate=args.lr,
+            weight_decay=args.weight_decay,
+            scheduler=args.scheduler,
+            momentum=args.momentum,
+            scheduler_gamma=args.scheduler_gamma,
+            scheduler_step=args.scheduler_step,
+            hidden_dim=args.hidden_dim,
+            bpd=False,
+            dataset="MQM9",
+            architecture="Flow",
+            weight_init=weight_init,
+            t=args.block_length,
+            inverted_mask=args.invert_mask,
+            upload=args.upload,
+            upload_interval=args.upload_interval,
+            mask_ratio=args.mask_ratio,
+        )
+
+        exp = AtomExp(config)
 
     exp.train()
 

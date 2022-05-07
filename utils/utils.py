@@ -1,4 +1,3 @@
-from torch import nn
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -17,6 +16,9 @@ def create_model_and_optimiser_sche(config):
         model = model.to(device)
     elif config['flow'] == "Coupling":
         model = config['model'](t=config['t'], affine=config['affine'])
+        model = model.to(device)
+    elif config['flow'] == "AtomFlow":
+        model = config['model'](hidden_dim=config['hidden_dim'], block_length=config['t'])
         model = model.to(device)
     else:
         raise ValueError(f"Unknown flow type: {config['flow']}")

@@ -1,17 +1,11 @@
 import torch
 from models.argmaxflowv2.model import ContextNet
 from models.argmaxflowv2.conditional import ConditionalAdjacencyBlockFlow
-from survae.distributions import ConditionalNormal
-from survae.flows import ConditionalInverseFlow
-from torch import embedding, nn
-from models.argmaxflowv2 import create_mask
-from models.argmaxflowv2 import ArgmaxSurjection, ArgmaxFlow
-from utils.qm9 import ModifiedQM9
-import torch_geometric.transforms as T
+from models.atomflow import create_mask
+
+from utils import get_datasets
 from models.atomflow import AtomFlow
 
-from utils import ToDenseAdjV2
-from utils import get_datasets, create_model_and_optimiser_sche
 
 if __name__ == '__main__':
     
@@ -28,12 +22,19 @@ if __name__ == '__main__':
 
     batch = next(iter(train_loader))
 
-    atomflow = AtomFlow(None)
+    g = AtomFlow(block_length=2, max_nodes=9, context_size=16, hidden_dim=64, inverted_mask=False)
+    
+    z, ldj = g(batch.x, batch.adj)
+    x, _ = g.inverse(z, batch.adj)
 
-    z, _ = atomflow(batch.x)
-    x, _ = atomflow.inverse(z)
+    print(z.shape, batch.x[0])
+    # atomflow = AtomFlow()
 
-    print(batch.x[0], "\n\n", x[0])
+    # z, log_det = atomflow(batch.x)
+    # x, _ = atomflow.inverse(z)
+
+    # print(z.shape, x.shape, log_det.shape)
+    # print(batch.x[0], "\n\n", x[0])
 
     # zeros = torch.zeros(45, dtype=torch.long)
     
