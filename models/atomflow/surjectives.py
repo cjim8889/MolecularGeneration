@@ -36,7 +36,7 @@ class AtomSurjection(Surjection):
         conditional_flow = ConditionalInverseFlow(base_dist=encoder_base, context_init=context_net, transforms=transform)
 
         self.categorical_surjection = ArgmaxSurjection(conditional_flow, num_classes)
-        self.ordinal_surjection = Dequantization(alpha=-.0001, quants=9, device=device)
+        self.ordinal_surjection = Dequantization(alpha=.01, quants=10, device=device)
 
     def forward(self, x):
 
@@ -45,6 +45,7 @@ class AtomSurjection(Surjection):
 
         z_c, ldj_c = self.categorical_surjection(categorical)
         z_o, ldj_o = self.ordinal_surjection(ordinal)
+
 
         z_o = z_o.view(z_o.shape[0], 1, z_o.shape[1], 1)
 
@@ -60,5 +61,4 @@ class AtomSurjection(Surjection):
         categorical, ldj_c = self.categorical_surjection.inverse(z_c)
         ordinal, ldj_o = self.ordinal_surjection.inverse(z_o)
 
-        # print(ldj_c.shape, ldj_o.shape)
         return torch.cat([categorical, ordinal], dim=1).permute(0, 2, 1), 0.

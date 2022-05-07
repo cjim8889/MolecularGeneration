@@ -39,18 +39,14 @@ class ConditionalARNet(nn.Module):
             nn.Flatten(start_dim=2, end_dim=-1),
             nn.Linear(45 * embedding_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
+            nn.Linear(hidden_dim, 9 * num_classes),
             nn.ReLU(),
-            nn.Linear(hidden_dim, 9 * num_classes)
         )
 
         self.net = nn.Sequential(
             nn.LazyConv2d(hidden_dim, 3, 1, 1),
             nn.LazyBatchNorm2d(),
             nn.GELU(),
-            nn.LazyConv2d(hidden_dim, 3, 1, 1),
-            nn.LazyBatchNorm2d(),
-            nn.ReLU(),
             nn.LazyConv2d(hidden_dim, 1, 1),
             nn.ReLU(),
             nn.LazyConv2d(2, 1, 1, 0),
@@ -113,6 +109,8 @@ class AtomFlow(nn.Module):
                 x, ldj = transform(x, context)
             else:
                 x, ldj = transform(x)
+                # if torch.all(torch.isfinite(ldj)) == False:
+                    # print(torch.all(torch.isfinite(ldj)), transform)
 
             log_prob += ldj
 

@@ -1,7 +1,7 @@
 from .datasets import get_datasets
 from models.atomflow import AtomFlow
 from .utils import create_model_and_optimiser_sche, argmax_criterion
-
+import torch.nn as nn
 import wandb
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -48,11 +48,10 @@ class AtomExp:
 
                     z, log_det = self.network(x, adj)
                     log_prob = torch.sum(self.base.log_prob(z), dim=[1, 2, 3])
-
                     loss = argmax_criterion(log_prob, log_det)
                     loss.backward()
 
-                    # nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+                    # nn.utils.clip_gsrad_norm_(self.network.parameters(), 1)
                     self.optimiser.step()
 
                     loss_step += loss
@@ -62,6 +61,7 @@ class AtomExp:
                     step += 1
                     if idx % 5 == 0:
                         ll = (loss_step / 5.).item()
+                        # print(f"Epoch: {epoch}, Step: {idx}, Loss: {ll}")
                         wandb.log({"epoch": epoch, "NLL": ll}, step=step)
 
                         

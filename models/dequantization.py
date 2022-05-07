@@ -53,7 +53,9 @@ class Dequantization(nn.Module):
 
 
         log_det += (-torch.log(z) - torch.log(1-z)).sum(dim=[1])
+        
         z = torch.logit(z, eps=1e-06)
+
 
 
         return z, log_det
