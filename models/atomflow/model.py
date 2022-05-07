@@ -71,7 +71,7 @@ class ConditionalARNet(nn.Module):
 
 
 class AtomFlow(nn.Module):
-    def __init__(self, context_init=None, block_length=6, max_nodes=9, context_size=8, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
+    def __init__(self, context_init=None, mask_ratio=9., block_length=6, max_nodes=9, context_size=8, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
         super().__init__()
 
 
@@ -93,7 +93,7 @@ class AtomFlow(nn.Module):
                 num_classes=7,
                 context_size=context_size,
                 inverted_mask=inverted_mask,
-                mask_ratio=1.,
+                mask_ratio=mask_ratio,
                 mask_init=create_mask,
             )
 
