@@ -10,6 +10,8 @@ wandb/
 
 *.pt
 
+*vscode/
+
 .DS_Store
 # Distribution / packaging
 .Python
