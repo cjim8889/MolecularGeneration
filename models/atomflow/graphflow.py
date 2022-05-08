@@ -57,9 +57,7 @@ class ConditionalARNet(nn.Module):
     # x: B x 1 x 9 x 7
     # context: context: B x C x 45 x Embedding_dim adj: B x 1 x 45 x 1
     def forward(self, x, context):
-        adj_dense = torch.zeros((x.shape[0], 9, 9), device=device)
-        adj_dense[..., self.indices[0], self.indices[1]] = context['adj'].view(x.shape[0], 45).float()
-        adj_dense[adj_dense > 0.] = 1.
+        adj_dense = context['b_adj']
 
         z = x.squeeze(1)
         z = self.graph_net(z, adj_dense).unsqueeze(1)
@@ -106,8 +104,8 @@ class AtomGraphFlow(nn.Module):
 
         if self.context_init is not None:
             context = {
-                "context": self.context_init(context),
-                "adj": context
+                "context": self.context_init(context['adj']),
+                "b_adj": context['b_adj']
             }
 
         for transform in self.transforms:
@@ -126,8 +124,8 @@ class AtomGraphFlow(nn.Module):
 
         if self.context_init is not None:
             context = {
-                "context": self.context_init(context),
-                "adj": context
+                "context": self.context_init(context['adj']),
+                "b_adj": context['b_adj']
             }
 
         for idx in range(len(self.transforms) - 1, -1, -1):

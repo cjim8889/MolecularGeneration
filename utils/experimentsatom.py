@@ -32,7 +32,13 @@ class AtomExp:
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        self.network(torch.zeros(1, 9, 2, device=device).long(), torch.zeros(1, 45, device=device).long())
+        if self.config['flow'] == "AtomGraph":
+            self.network(torch.zeros(1, 9, 2, device=device).long(), {
+                "adj": torch.zeros(1, 45, device=device).long(),
+                "b_adj": torch.zeros(1, 9, 9, device=device).long()
+            })
+        else:
+            self.network(torch.zeros(1, 9, 2, device=device).long(), torch.zeros(1, 45, device=device).long())
         print(f"Model Parameters: {sum([p.numel() for p in self.network.parameters()])}")
         # print(self.network)
 
@@ -46,14 +52,26 @@ class AtomExp:
                 for idx, batch_data in enumerate(self.train_loader):
 
                     adj = batch_data.adj
+                    b_adj = batch_data.b_adj
                     x = batch_data.x
                     
                     adj = adj.to(device)
                     x = x.to(device)
+                    b_adj = b_adj.to(device)
 
                     self.optimiser.zero_grad()
 
-                    z, log_det = self.network(x, adj)
+                    context = None
+
+                    if self.config['flow'] == "AtomGraph":
+                        context = {
+                            "adj": adj,
+                            "b_adj": b_adj
+                        }
+                    else:
+                        context = adj
+
+                    z, log_det = self.network(x, context)
                     log_prob = torch.sum(self.base.log_prob(z), dim=[1, 2, 3])
                     loss = argmax_criterion(log_prob, log_det)
                     loss.backward()
