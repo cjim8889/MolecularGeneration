@@ -8,6 +8,8 @@ wandb/
 # C extensions
 *.so
 
+*.pt
+
 .DS_Store
 # Distribution / packaging
 .Python

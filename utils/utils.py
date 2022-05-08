@@ -46,7 +46,7 @@ def create_model_and_optimiser_sche(config):
         states = torch.load(config["load_from"], map_location=device)
 
         model.load_state_dict(states["model_state_dict"])
-        optimiser.load_state_dict(states["optimiser_state_dict"])
+        optimiser.load_state_dict(states["optimizer_state_dict"])
 
         if "scheduler" in config:
             scheduler.load_state_dict(states["scheduler_state_dict"])
