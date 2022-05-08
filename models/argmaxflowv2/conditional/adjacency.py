@@ -39,7 +39,7 @@ class ConditionalARNet(nn.Module):
 
 
 class ConditionalAdjacencyBlockFlow(ConditionalBijection):
-    def __init__(self, ar_net=ConditionalARNet, max_nodes=9, embedding_dim=7, num_classes=5, context_size=1, hidden_dim=128, mask_ratio=2., inverted_mask=False, mask_init=create_mask):
+    def __init__(self, ar_net=ConditionalARNet, max_nodes=9, embedding_dim=7, num_classes=5, context_size=1, hidden_dim=128, mask_ratio=2., inverted_mask=False, mask_init=create_mask, split_dim=1):
         super(ConditionalAdjacencyBlockFlow, self).__init__()
         self.step_size = int(np.ceil(max_nodes / mask_ratio))
         self.transforms = nn.ModuleList()
@@ -48,7 +48,7 @@ class ConditionalAdjacencyBlockFlow(ConditionalBijection):
         # context: B x context_size x 45 x embedding_dim
         for idx in range(0, max_nodes, self.step_size):
             net = ar_net(embedding_dim=embedding_dim, context_size=context_size, hidden_dim=hidden_dim, num_classes=num_classes)
-            tr = MaskedConditionalCouplingFlow(net, mask=mask_init([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask))
+            tr = MaskedConditionalCouplingFlow(net, mask=mask_init([idx, max(idx + self.step_size, max_nodes)], max_nodes, invert=inverted_mask), split_dim=split_dim)
             self.transforms.append(tr)
 
 

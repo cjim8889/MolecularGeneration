@@ -1,5 +1,6 @@
 from .datasets import get_datasets
 from models.atomflow import AtomFlow
+from models.atomflow.graphflow import AtomGraphFlow
 from .utils import create_model_and_optimiser_sche, argmax_criterion
 import torch.nn as nn
 import wandb
@@ -13,14 +14,20 @@ class AtomExp:
         super().__init__()
 
         self.config = config
-        self.config['flow'] = "AtomFlow" 
-        self.config['model'] = AtomFlow
+
+        if self.config['flow'] == "AtomGraph":
+            self.config['flow'] = "AtomGraph" 
+            self.config['model'] = AtomGraphFlow
+        else:
+            self.config['flow'] = "AtomFlow" 
+            self.config['model'] = AtomFlow
+
         if "hidden_dim" not in self.config:
             self.config['hidden_dim'] = 128
 
         self.batch_size = self.config["batch_size"] if "batch_size" in self.config else 128
 
-        self.train_loader, self.test_loader = get_datasets(type="mqm9", batch_size=self.batch_size)
+        self.train_loader, self.test_loadesr = get_datasets(type="mqm9", batch_size=self.batch_size)
         self.network, self.optimiser, self.scheduler = create_model_and_optimiser_sche(self.config)
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
