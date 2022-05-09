@@ -23,7 +23,10 @@ class ContextNet(nn.Module):
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(),
-            nn.LazyConv2d(context_size, kernel_size=1, stride=1),
+            nn.LazyConv2d(1, kernel_size=1, stride=1),
+            nn.ReLU(),
+            Rearrange("B 1 H W -> B H W"),
+            nn.Linear(9, 9),
             nn.ReLU(),
         )
 
@@ -39,15 +42,8 @@ class ConditionalARNet(nn.Module):
         
         self.indices = torch.triu_indices(9, 9, device=device)
         self.graph_nets = nn.ModuleList([
-            DenseGCNConv(num_classes + 9, hidden_dim),
-            DenseGCNConv(hidden_dim, num_classes)
+            DenseGCNConv(num_classes + 9, num_classes),
         ])
-
-        self.context_net = nn.Sequential(
-            Rearrange("B 1 H W -> B H W"),
-            nn.Linear(9, 9),
-            nn.ReLU(),
-        )
 
         self.net = nn.Sequential(
             Rearrange("B H W -> B 1 H W"),
@@ -59,10 +55,11 @@ class ConditionalARNet(nn.Module):
         )
     # x: B x 1 x 9 x 7
     # context: context: B x C x 45 x Embedding_dim adj: B x 1 x 45 x 1
+
     def forward(self, x, context):
         adj_dense = context['b_adj']
 
-        c = self.context_net(context['context'])
+        c = context['context']
 
         z = x.squeeze(1)
         z = torch.cat((z, c), dim=-1)
@@ -93,8 +90,7 @@ class AtomGraphFlowV2(nn.Module):
             # self.transforms.append(norm)
 
             # conv1x1 = Conv1x1(num_channels=1, orthogonal_init=True, slogdet_cpu=True)
-
-            # self.transforms.append(conv1sx1)
+            # self.transforms.append(conv1x1)
 
             cf = ConditionalAdjacencyBlockFlow(
                 ar_net=ConditionalARNet,
