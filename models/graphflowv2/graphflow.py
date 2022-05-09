@@ -1,4 +1,3 @@
-from numpy import indices
 import torch
 import torch.nn as nn
 from ..argmaxflowv2 import ContextNet, ConditionalAdjacencyBlockFlow
@@ -16,14 +15,12 @@ class ContextNet(nn.Module):
         super(ContextNet, self).__init__()
         #Assume input B x 45
         self.net = nn.Sequential(
-            nn.Embedding(num_classes, embedding_dim), # B x 45 x embedding_dim
-            Rearrange("B W E -> B 1 W E"),
+            Rearrange("B H W C -> B C H W"),
             # Padding is flaky and requires further investigation 
-            nn.Conv2d(1, hidden_dim, kernel_size=(1, embedding_dim), stride=1),
+            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(),
-            nn.Conv2d(hidden_dim, context_size, kernel_size=1, stride=1),
-            nn.LazyBatchNorm2d(),
+            nn.LazyConv2d(context_size, kernel_size=1, stride=1),
             nn.ReLU(),
         )
 
@@ -38,16 +35,19 @@ class ConditionalARNet(nn.Module):
         
         
         self.indices = torch.triu_indices(9, 9, device=device)
-        self.graph_net = DenseGCNConv(num_classes, num_classes)
+        self.graph_nets = nn.ModuleList([
+            DenseGCNConv(num_classes + 9, num_classes),
+            DenseGCNConv(num_classes, num_classes)
+        ])
 
         self.context_net = nn.Sequential(
-            nn.Flatten(start_dim=2, end_dim=-1),
-            nn.Linear(45, 9 * num_classes),
+            Rearrange("B 1 H W -> B H W"),
+            nn.Linear(9, 9),
             nn.ReLU(),
-            nn.Unflatten(dim=-1, unflattened_size=(9, 7))
         )
 
         self.net = nn.Sequential(
+            Rearrange("B H W -> B 1 H W"),
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.ReLU(),
             nn.LazyConv2d(2, kernel_size=1, stride=1),
@@ -57,13 +57,13 @@ class ConditionalARNet(nn.Module):
     def forward(self, x, context):
         adj_dense = context['b_adj']
 
-        z = x.squeeze(1)
-        z = self.graph_net(z, adj_dense).unsqueeze(1)
-
         c = self.context_net(context['context'])
 
+        z = x.squeeze(1)
+        z = torch.cat((z, c), dim=-1)
 
-        z = torch.cat([z, c], dim=1)
+        for graph in self.graph_nets:
+            z = graph(z, adj_dense)
 
         return self.net(z)
 

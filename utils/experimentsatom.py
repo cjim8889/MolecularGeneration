@@ -37,9 +37,14 @@ class AtomExp:
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV2":
+        if self.config['flow'] == "AtomGraph":
             self.network(torch.zeros(1, 9, 2, device=device).long(), {
                 "adj": torch.zeros(1, 45, device=device).long(),
+                "b_adj": torch.zeros(1, 9, 9, device=device).long()
+            })
+        elif self.config['flow'] == "AtomGraphV2":
+            self.network(torch.zeros(1, 9, 2, device=device).long(), {
+                "adj": torch.zeros(1, 9, 9, 5, device=device).float(),
                 "b_adj": torch.zeros(1, 9, 9, device=device).long()
             })
         else:
@@ -56,11 +61,9 @@ class AtomExp:
 
                 for idx, batch_data in enumerate(self.train_loader):
 
-                    adj = batch_data.adj
                     b_adj = batch_data.b_adj
                     x = batch_data.x
                     
-                    adj = adj.to(device)
                     x = x.to(device)
                     b_adj = b_adj.to(device)
 
@@ -68,13 +71,20 @@ class AtomExp:
 
                     context = None
 
-                    if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV2":
+                    if self.config['flow'] == "AtomGraph":
+                        adj = batch_data.adj.to(device)
                         context = {
                             "adj": adj,
                             "b_adj": b_adj
                         }
+                    elif self.config['flow'] == "AtomGraphV2":
+                        adj = batch_data.orig_adj.to(device)
+                        context = {
+                            "adj": adj.float(),
+                            "b_adj": b_adj
+                        }
                     else:
-                        context = adj
+                        context = batch_data.adj.to(device)
 
                     z, log_det = self.network(x, context)
                     log_prob = torch.sum(self.base.log_prob(z), dim=[1, 2, 3])
