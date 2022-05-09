@@ -83,13 +83,13 @@ class AtomGraphFlowV2(nn.Module):
         self.transforms.append(self.surjection)
 
         for idx in range(block_length):
-            norm = ActNormBijection2d(num_features=1)
+            # norm = ActNormBijection2d(num_features=1)
 
-            self.transforms.append(norm)
+            # self.transforms.append(norm)
 
             # conv1x1 = Conv1x1(num_channels=1, orthogonal_init=True, slogdet_cpu=True)
 
-            # self.transforms.append(conv1x1)
+            # self.transforms.append(conv1sx1)
 
             cf = ConditionalAdjacencyBlockFlow(
                 ar_net=ConditionalARNet,
