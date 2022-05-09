@@ -1,6 +1,7 @@
 from .datasets import get_datasets
 from models.atomflow import AtomFlow
 from models.atomflow.graphflow import AtomGraphFlow
+from models.graphflowv2 import AtomGraphFlowV2
 from .utils import create_model_and_optimiser_sche, argmax_criterion
 import torch.nn as nn
 import wandb
@@ -18,9 +19,13 @@ class AtomExp:
         if self.config['flow'] == "AtomGraph":
             self.config['flow'] = "AtomGraph" 
             self.config['model'] = AtomGraphFlow
+        elif self.config['flow'] == "AtomGraphV2":
+            self.config['flow'] = "AtomGraphV2"
+            self.config['model'] = AtomGraphFlowV2
         else:
             self.config['flow'] = "AtomFlow" 
             self.config['model'] = AtomFlow
+        
 
         if "hidden_dim" not in self.config:
             self.config['hidden_dim'] = 128
@@ -32,7 +37,7 @@ class AtomExp:
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        if self.config['flow'] == "AtomGraph":
+        if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV2":
             self.network(torch.zeros(1, 9, 2, device=device).long(), {
                 "adj": torch.zeros(1, 45, device=device).long(),
                 "b_adj": torch.zeros(1, 9, 9, device=device).long()
@@ -63,7 +68,7 @@ class AtomExp:
 
                     context = None
 
-                    if self.config['flow'] == "AtomGraph":
+                    if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV2":
                         context = {
                             "adj": adj,
                             "b_adj": b_adj

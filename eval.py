@@ -9,27 +9,21 @@ from rdkit import Chem
 from torch_geometric.nn import DenseGraphConv
 from models.atomflow.graphflow import ContextNet
 from models.atomflow.graphflow import AtomGraphFlow
-
+from survae.transforms.bijections import Conv1x1, ActNormBijection2d
 
 
 device = torch.device("cpu")
 
-# net = ContextNet(context_size=1, num_classes=5, embedding_dim=5, hidden_dim=32)
-
-# z = net(torch.ones(1, 45).long())
-
-# print(z.shape)
-
-net = AtomGraphFlow(
-    mask_ratio=9,
-    block_length=1,
-    max_nodes=9,
-    context_size=1,
-    hidden_dim=32
+flow = Conv1x1(
+    num_channels=1,
+    orthogonal_init=True,
+    slogdet_cpu=True
 )
 
+norm = ActNormBijection2d(
+    num_features=1
+)
 
-z, _ = net(torch.ones(1, 9, 2).long(), torch.ones(1, 45).long())
+z, ldj = norm(torch.randn(1, 1, 9, 2))
 
-print(z.shape)
-print(sum([p.numel() for p in net.parameters()]))
+print(z, z.shape)

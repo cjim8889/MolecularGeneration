@@ -126,22 +126,22 @@ if __name__ == '__main__':
     
 
 
-    mols_qm9 = []
-    smiles_qm9 = set()
-    for data in dataset:
-        at = data.x.long()
-        adj = torch.cat((torch.zeros(9, 9, 1, dtype=torch.int64, device=device), data.orig_adj), dim=-1).argmax(-1)
+    # mols_qm9 = []
+    # smiles_qm9 = set()
+    # for data in dataset:
+    #     at = data.x.long()
+    #     adj = torch.cat((torch.zeros(9, 9, 1, dtype=torch.int64, device=device), data.orig_adj), dim=-1).argmax(-1)
 
-        mols_qm9.append(get_mol(at, adj))
+    #     mols_qm9.append(get_mol(at, adj))
 
-    for mol in mols_qm9:
-        try:
-            Chem.SanitizeMol(mol)
-            smiles = Chem.MolToSmiles(mol)
-            smiles_qm9.add(smiles)
-            print(f"Correct Molecule: {smiles}")
-        except:
-            continue
+    # for mol in mols_qm9:
+    #     try:
+    #         Chem.SanitizeMol(mol)
+    #         smiles = Chem.MolToSmiles(mol)
+    #         smiles_qm9.add(smiles)
+    #         print(f"Correct Molecule: {smiles}")
+    #     except:
+    #         continue
 
     
     # print(len(smiles_qsm9))
