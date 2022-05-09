@@ -21,13 +21,13 @@ class ContextNet(nn.Module):
             # Padding is flaky and requires further investigation 
             nn.Conv2d(1, hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Conv2d(hidden_dim, hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Conv2d(hidden_dim, context_size, kernel_size=(1, embedding_dim), stride=1),
             nn.LazyBatchNorm2d(),
-            nn.ReLU(True),
+            nn.ReLU(),
         )
 
     def forward(self, x):
@@ -45,11 +45,11 @@ class ConditionalARNet(nn.Module):
 
         self.context_net = nn.Sequential(
             nn.Flatten(start_dim=2, end_dim=-1),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Linear(45, hidden_dim),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Linear(hidden_dim, 9 * num_classes),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Unflatten(dim=-1, unflattened_size=(9, 7))
         )
 
