@@ -87,9 +87,9 @@ class AtomGraphFlowV2(nn.Module):
 
             self.transforms.append(norm)
 
-            conv1x1 = Conv1x1(num_channels=1, orthogonal_init=True, slogdet_cpu=True)
+            # conv1x1 = Conv1x1(num_channels=1, orthogonal_init=True, slogdet_cpu=True)
 
-            self.transforms.append(conv1x1)
+            # self.transforms.append(conv1x1)
 
             cf = ConditionalAdjacencyBlockFlow(
                 ar_net=ConditionalARNet,
