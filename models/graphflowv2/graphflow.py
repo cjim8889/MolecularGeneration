@@ -20,6 +20,9 @@ class ContextNet(nn.Module):
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(),
+            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
+            nn.LazyBatchNorm2d(),
+            nn.ReLU(),
             nn.LazyConv2d(context_size, kernel_size=1, stride=1),
             nn.ReLU(),
         )
@@ -36,8 +39,8 @@ class ConditionalARNet(nn.Module):
         
         self.indices = torch.triu_indices(9, 9, device=device)
         self.graph_nets = nn.ModuleList([
-            DenseGCNConv(num_classes + 9, num_classes),
-            DenseGCNConv(num_classes, num_classes)
+            DenseGCNConv(num_classes + 9, hidden_dim),
+            DenseGCNConv(hidden_dim, num_classes)
         ])
 
         self.context_net = nn.Sequential(
@@ -49,6 +52,8 @@ class ConditionalARNet(nn.Module):
         self.net = nn.Sequential(
             Rearrange("B H W -> B 1 H W"),
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
+            nn.ReLU(),
+            nn.LazyConv2d(hidden_dim * 2, kernel_size=1, stride=1),
             nn.ReLU(),
             nn.LazyConv2d(2, kernel_size=1, stride=1),
         )
