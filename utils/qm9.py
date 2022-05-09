@@ -288,7 +288,7 @@ class ModifiedQM9(InMemoryDataset):
             name = mol.GetProp('_Name')
 
             data = Data(x=x, z=z, pos=pos, edge_index=edge_index,
-                        edge_attr=edge_attr, y=y, name=name, idx=i, smiles=smiles, bond_num=bond_num)
+                        edge_attr=edge_attr, y=y, name=name, idx=i, smiles=smiles)
 
             if self.pre_filter is not None and not self.pre_filter(data):
                 continue
