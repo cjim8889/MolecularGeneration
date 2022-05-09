@@ -48,7 +48,7 @@ class ConditionalARNet(nn.Module):
             nn.ReLU(True),
             nn.Linear(45, hidden_dim),
             nn.ReLU(True),
-            nn.Linear(45, 9 * num_classes),
+            nn.Linear(hidden_dim, 9 * num_classes),
             nn.ReLU(True),
             nn.Unflatten(dim=-1, unflattened_size=(9, 7))
         )
