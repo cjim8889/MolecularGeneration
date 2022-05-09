@@ -228,10 +228,12 @@ class ModifiedQM9(InMemoryDataset):
                                    sanitize=True)
 
         data_list = []
+
         for i, mol in enumerate(tqdm(suppl)):
             if i in skip or mol is None:
                 continue
-
+            
+            smiles = Chem.MolToSmiles(mol)
             N = mol.GetNumAtoms()
 
             pos = suppl.GetItemText(i).split('\n')[4:4 + N]
@@ -286,7 +288,7 @@ class ModifiedQM9(InMemoryDataset):
             name = mol.GetProp('_Name')
 
             data = Data(x=x, z=z, pos=pos, edge_index=edge_index,
-                        edge_attr=edge_attr, y=y, name=name, idx=i)
+                        edge_attr=edge_attr, y=y, name=name, idx=i, smiles=smiles, bond_num=bond_num)
 
             if self.pre_filter is not None and not self.pre_filter(data):
                 continue

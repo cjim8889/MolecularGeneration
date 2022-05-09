@@ -33,6 +33,7 @@ class ToDenseAdjV2(BaseTransform):
 
         size = torch.Size([num_nodes, num_nodes] + list(edge_attr.size())[1:])
         adj = torch.sparse_coo_tensor(data.edge_index, edge_attr, size)
+
         data.orig_adj = adj.to_dense().float()
         
         tmp = torch.ones(data.orig_adj.shape[0], data.orig_adj.shape[1], 1) * 0.5
@@ -62,7 +63,6 @@ class ToDenseAdjV2(BaseTransform):
             ordinal = data.x[..., -1:]
 
             tmp = torch.ones(categorical.shape[0], 1) * 0.5
-            # print(tmp.shape, categorical.shape)
 
             categorical = torch.cat((tmp, categorical), dim=-1).argmax(dim=-1).long()
 

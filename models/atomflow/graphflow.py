@@ -22,6 +22,9 @@ class ContextNet(nn.Module):
             nn.Conv2d(1, hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(True),
+            nn.Conv2d(hidden_dim, hidden_dim, kernel_size=1, stride=1),
+            nn.LazyBatchNorm2d(),
+            nn.ReLU(True),
             nn.Conv2d(hidden_dim, context_size, kernel_size=(1, embedding_dim), stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(True),
@@ -42,6 +45,9 @@ class ConditionalARNet(nn.Module):
 
         self.context_net = nn.Sequential(
             nn.Flatten(start_dim=2, end_dim=-1),
+            nn.ReLU(True),
+            nn.Linear(45, hidden_dim),
+            nn.ReLU(True),
             nn.Linear(45, 9 * num_classes),
             nn.ReLU(True),
             nn.Unflatten(dim=-1, unflattened_size=(9, 7))
@@ -50,7 +56,7 @@ class ConditionalARNet(nn.Module):
         self.net = nn.Sequential(
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.ReLU(),
-            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
+            nn.LazyConv2d(hidden_dim * 2, kernel_size=1, stride=1),
             nn.ReLU(),
             nn.LazyConv2d(2, kernel_size=1, stride=1),
         )
