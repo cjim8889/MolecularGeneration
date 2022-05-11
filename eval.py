@@ -1,29 +1,27 @@
 import torch
-from models import atomflow
 
+from models.graphflowv3.argmax import ContextNet, ArgmaxSurjection
+from models.graphflowv3 import AtomSurjection
+from survae.distributions import ConditionalNormal
+import torch.nn as nn
 
-from models.atomflow import AtomFlow
-from models.argmaxflowv2 import ArgmaxFlow
-
-from rdkit import Chem
-from torch_geometric.nn import DenseGraphConv
-from models.atomflow.graphflow import ContextNet
-from models.atomflow.graphflow import AtomGraphFlow
-from survae.transforms.bijections import Conv1x1, ActNormBijection2d
-
+from utils import get_datasets
 
 device = torch.device("cpu")
 
-flow = Conv1x1(
-    num_channels=1,
-    orthogonal_init=True,
-    slogdet_cpu=True
-)
+context_size=16
+num_classes=5
+embedding_dim=7
+hidden_dim=64
 
-norm = ActNormBijection2d(
-    num_features=1
-)
 
-z, ldj = norm(torch.randn(1, 1, 9, 2))
+if __name__ == "__main__":
+    train_loader, test_loadesr = get_datasets(type="mqm9", batch_size=128)
 
-print(z, z.shape)
+    batch = next(iter(train_loader))
+    print(batch.adj.shape)
+
+    sur = AtomSurjection()
+
+    z, ldj = sur(torch.ones(1, 9, 2).long())
+    print(z.shape)

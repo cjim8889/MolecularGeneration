@@ -1,7 +1,8 @@
+from pprint import pp
 import torch
 import torch.nn as nn
-from ..argmaxflowv2 import ConditionalAdjacencyBlockFlow
-from survae.transforms.bijections import ConditionalBijection, ActNormBijection2d, Conv1x1
+from .argmax import ConditionalAdjacencyBlockFlow, ar_net_init
+from survae.transforms.bijections import ConditionalBijection
 from torch_geometric.nn import DenseGCNConv
 
 from .surjectives import AtomSurjection
@@ -10,24 +11,23 @@ from .utils import create_mask
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class ContextNet(nn.Module):
-    def __init__(self, context_size=16, num_classes=4, embedding_dim=5, hidden_dim=32):
-        super(ContextNet, self).__init__()
+class AdjContextNet(nn.Module):
+    def __init__(self, context_size=16, num_classes=5, embedding_dim=7, hidden_dim=32):
+        super(AdjContextNet, self).__init__()
         #Assume input B x 45
         self.net = nn.Sequential(
-            Rearrange("B H W C -> B C H W"),
+            nn.Embedding(num_classes, embedding_dim),
+            nn.Linear(embedding_dim, embedding_dim),
+            nn.ReLU(),
+            Rearrange("B H E -> B 1 H E"),
             # Padding is flaky and requires further investigation 
-            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
-            nn.LazyBatchNorm2d(),
+            nn.LazyConv2d(hidden_dim, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(),
-            nn.LazyConv2d(1, kernel_size=1, stride=1),
-            nn.ReLU(),
-            Rearrange("B 1 H W -> B H W"),
-            nn.Linear(9, 9),
-            nn.ReLU(),
+            nn.LazyConv2d(context_size, kernel_size=1, stride=1),
+            nn.ReLU(), # B x C x 45 x E
         )
 
     def forward(self, x):
@@ -36,22 +36,31 @@ class ContextNet(nn.Module):
 
 class ConditionalARNet(nn.Module):
     
-    def __init__(self, embedding_dim=7, num_classes=7, context_size=1, hidden_dim=64):
+    def __init__(self, context_embedding_dim=7, x_width=7, max_nodes=9, hidden_dim=64):
         super().__init__()
         
-        
-        self.indices = torch.triu_indices(9, 9, device=device)
         self.graph_nets = nn.ModuleList([
-            DenseGCNConv(num_classes + 9, num_classes),
+            DenseGCNConv(x_width, x_width),
+            DenseGCNConv(x_width, x_width),
         ])
 
         self.net = nn.Sequential(
-            Rearrange("B H W -> B 1 H W"),
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.ReLU(),
-            nn.LazyConv2d(hidden_dim * 2, kernel_size=1, stride=1),
+            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.ReLU(),
             nn.LazyConv2d(2, kernel_size=1, stride=1),
+        )
+
+        self.context_net = nn.Sequential(
+            nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
+            nn.ReLU(),
+            nn.LazyConv2d(1, kernel_size=1, stride=1),
+            nn.ReLU(),
+            Rearrange("B 1 H E -> B 1 (H E)"),
+            nn.Linear(45 * context_embedding_dim, max_nodes * x_width),
+            nn.ReLU(),
+            Rearrange("B 1 (H E) -> B 1 H E", H=max_nodes, E=x_width),
         )
     # x: B x 1 x 9 x 7
     # context: context: B x C x 45 x Embedding_dim adj: B x 1 x 45 x 1
@@ -59,23 +68,22 @@ class ConditionalARNet(nn.Module):
     def forward(self, x, context):
         adj_dense = context['b_adj']
 
-        c = context['context']
+        c = self.context_net(context['context'])
 
         z = x.squeeze(1)
-        z = torch.cat((z, c), dim=-1)
 
         for graph in self.graph_nets:
             z = graph(z, adj_dense)
 
-        return self.net(z)
+        return self.net(torch.cat((z.unsqueeze(1), c), dim=1))
 
 
-class AtomGraphFlowV2(nn.Module):
+class AtomGraphFlowV3(nn.Module):
     def __init__(self, context_init=None, mask_ratio=9., block_length=6, max_nodes=9, context_size=1, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
         super().__init__()
 
         if context_init is None:
-            context_init = ContextNet(context_size=context_size, num_classes=5, embedding_dim=5, hidden_dim=hidden_dim)
+            context_init = AdjContextNet(context_size=context_size, hidden_dim=hidden_dim)
 
         self.context_init = context_init
         
@@ -84,20 +92,17 @@ class AtomGraphFlowV2(nn.Module):
 
         self.transforms.append(self.surjection)
 
+        ar_net_func = ar_net_init(
+            ConditionalARNet,
+            context_embedding_dim=7,
+            x_width=7, 
+            max_nodes=max_nodes, 
+            hidden_dim=hidden_dim
+        )
+
         for idx in range(block_length):
-            # norm = ActNormBijection2d(num_features=1)
-
-            # self.transforms.append(norm)
-
-            # conv1x1 = Conv1x1(num_channels=1, orthogonal_init=True, slogdet_cpu=True)
-            # self.transforms.append(conv1x1)
-
             cf = ConditionalAdjacencyBlockFlow(
-                ar_net=ConditionalARNet,
-                max_nodes=max_nodes,
-                embedding_dim=embedding_dim,
-                num_classes=7,
-                context_size=context_size,
+                ar_net_init=ar_net_func,
                 inverted_mask=inverted_mask,
                 mask_ratio=mask_ratio,
                 mask_init=create_mask,

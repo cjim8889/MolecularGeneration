@@ -2,6 +2,7 @@ from .datasets import get_datasets
 from models.atomflow import AtomFlow
 from models.atomflow.graphflow import AtomGraphFlow
 from models.graphflowv2 import AtomGraphFlowV2
+from models.graphflowv3 import AtomGraphFlowV3
 from .utils import create_model_and_optimiser_sche, argmax_criterion
 import torch.nn as nn
 import wandb
@@ -17,11 +18,11 @@ class AtomExp:
         self.config = config
 
         if self.config['flow'] == "AtomGraph":
-            self.config['flow'] = "AtomGraph" 
             self.config['model'] = AtomGraphFlow
         elif self.config['flow'] == "AtomGraphV2":
-            self.config['flow'] = "AtomGraphV2"
             self.config['model'] = AtomGraphFlowV2
+        elif self.config['flow'] == "AtomGraphV3":
+            self.config['model'] = AtomGraphFlowV3
         else:
             self.config['flow'] = "AtomFlow" 
             self.config['model'] = AtomFlow
@@ -37,7 +38,7 @@ class AtomExp:
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        if self.config['flow'] == "AtomGraph":
+        if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3":
             self.network(torch.zeros(1, 9, 2, device=device).long(), {
                 "adj": torch.zeros(1, 45, device=device).long(),
                 "b_adj": torch.zeros(1, 9, 9, device=device).long()
@@ -71,7 +72,7 @@ class AtomExp:
 
                     context = None
 
-                    if self.config['flow'] == "AtomGraph":
+                    if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3":
                         adj = batch_data.adj.to(device)
                         context = {
                             "adj": adj,
