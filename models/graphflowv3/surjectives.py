@@ -58,7 +58,6 @@ class AtomSurjection(Surjection):
         z_c, ldj_c = self.categorical_surjection(categorical)
         z_o, ldj_o = self.ordinal_surjection(ordinal)
 
-        print(z_c.shape, z_o.shape)
         z_o = z_o.view(z_o.shape[0], 1, z_o.shape[1], 1)
 
         z = torch.cat([z_c, z_o], dim=-1)
