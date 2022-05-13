@@ -79,7 +79,7 @@ class ConditionalARNet(nn.Module):
 
 
 class AtomGraphFlowV3(nn.Module):
-    def __init__(self, context_init=None, mask_ratio=9., block_length=6, max_nodes=9, context_size=1, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
+    def __init__(self, context_init=None, mask_ratio=9., block_length=6, surjection_length=4, max_nodes=9, context_size=1, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
         super().__init__()
 
         if context_init is None:
@@ -87,7 +87,7 @@ class AtomGraphFlowV3(nn.Module):
 
         self.context_init = context_init
         
-        self.surjection = AtomSurjection(hidden_dim=hidden_dim, block_length=8)
+        self.surjection = AtomSurjection(hidden_dim=hidden_dim, block_length=surjection_length)
         self.transforms = nn.ModuleList()
 
         self.transforms.append(self.surjection)
