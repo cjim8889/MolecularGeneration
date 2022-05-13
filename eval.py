@@ -61,11 +61,11 @@ if __name__ == "__main__":
     # print(batch.orig_adj[0])
     network = AtomGraphFlowV3(
         mask_ratio=9,
-        block_length=6,
+        block_length=12,
         hidden_dim=64
     )
 
-    states = torch.load("v3.pt", map_location=device)
+    states = torch.load("v3_12.pt", map_location=device)
 
     network.load_state_dict(states['model_state_dict'])
 

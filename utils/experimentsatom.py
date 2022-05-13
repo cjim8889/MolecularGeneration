@@ -53,7 +53,7 @@ class AtomExp:
         print(f"Model Parameters: {sum([p.numel() for p in self.network.parameters()])}")
         # print(self.network)
 
-        with wandb.init(project="molecule-flow", config=self.config):
+        with wandb.init(project="molecule-flow", config=self.config) as run:
             step = 0
             for epoch in range(self.config['epochs']):
                 loss_step = 0
@@ -109,6 +109,7 @@ class AtomExp:
                         loss_step = 0
 
                 self.scheduler.step()
+                wandb.log("Learning Rate/Epoch", self.scheduler.get_last_lr()[0])
                 wandb.log({"NLL/Epoch": (loss_ep_train / len(self.train_loader)).item()}, step=epoch)
                 if self.config['upload']:
                     if epoch % self.config['upload_interval'] == 0:
@@ -117,7 +118,7 @@ class AtomExp:
                         'model_state_dict': self.network.state_dict(),
                         'optimizer_state_dict': self.optimiser.state_dict(),
                         'scheduler_state_dict': self.scheduler.state_dict(),
-                        }, f"model_checkpoint_{epoch}.pt")
+                        }, f"model_checkpoint_{run.id}_{epoch}.pt")
                     
-                        wandb.save(f"model_checkpoint_{epoch}.pt")
+                        wandb.save(f"model_checkpoint_{run.id}_{epoch}.pt")
 
