@@ -10,6 +10,7 @@ wandb/
 
 *.pt
 
+*.icloud
 *vscode/
 
 .DS_Store

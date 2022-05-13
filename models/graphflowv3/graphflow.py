@@ -87,7 +87,7 @@ class AtomGraphFlowV3(nn.Module):
 
         self.context_init = context_init
         
-        self.surjection = AtomSurjection()
+        self.surjection = AtomSurjection(hidden_dim=hidden_dim)
         self.transforms = nn.ModuleList()
 
         self.transforms.append(self.surjection)

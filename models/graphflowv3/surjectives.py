@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class AtomSurjection(Surjection):
     stochastic_forward = True
 
-    def __init__(self, num_classes=6, max_nodes=9, hidden_dim=64, mask_ratio=9., block_length=4):
+    def __init__(self, num_classes=6, max_nodes=9, hidden_dim=64, mask_ratio=9., block_length=6):
         super().__init__()
 
         context_size = 16

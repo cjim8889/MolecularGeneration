@@ -14,7 +14,7 @@ from utils import ModifiedQM9
 from torch_geometric import transforms as T
 
 device = torch.device("cpu")
-bond_dict = {1: Chem.rdchem.BondType.SINGLE, 2: Chem.rdchem.BondType.DOUBLE, 3: Chem.rdchem.BondType.TRIPLE, 4: Chem.rdchem.BondType.AROMATIC}
+bond_dict = {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE, 3: Chem.rdchem.BondType.AROMATIC}
 atom_decoder = ['B', 'H', 'C', 'N', 'O', 'F']
 atom_encoder = {'H': 1, 'C': 2, 'N': 3, 'O': 4, 'F': 5}
 
@@ -42,7 +42,7 @@ def get_mol(atom_map, adj_dense):
 
     for i in range(end_index):
         for j in range(i + 1, end_index):
-            if adj_dense[i, j] == 0:
+            if adj_dense[i, j] == 4:
                 continue
 
             
