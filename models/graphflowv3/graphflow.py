@@ -83,7 +83,7 @@ class AtomGraphFlowV3(nn.Module):
         super().__init__()
 
         if context_init is None:
-            context_init = AdjContextNet(context_size=context_size, hidden_dim=hidden_dim)
+            context_init = AdjContextNet(context_size=context_size, hidden_dim=hidden_dim, embedding_dim=embedding_dim)
 
         self.context_init = context_init
         
@@ -94,7 +94,7 @@ class AtomGraphFlowV3(nn.Module):
 
         ar_net_func = ar_net_init(
             ConditionalARNet,
-            context_embedding_dim=7,
+            context_embedding_dim=embedding_dim,
             x_width=7, 
             max_nodes=max_nodes, 
             hidden_dim=hidden_dim

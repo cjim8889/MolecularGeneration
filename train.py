@@ -20,6 +20,8 @@ parser.add_argument("--momentum", help="Momentum for the SGD optimiser", type=fl
 parser.add_argument("--invert_mask", help="Invert masking of atom", type=bool, default=False)
 parser.add_argument("--hidden_dim", help="Hidden dimension", type=int, default=64)
 parser.add_argument("--mask_ratio", help="Mask ratio", type=float, default=2.)
+parser.add_argument("--context_size", help="Context size", type=int, default=16)
+parser.add_argument("--surjection_length", help="Surjection length", type=int, default=4)
 
 parser.add_argument("--scheduler", help="Scheduler", type=str, default="StepLR")
 parser.add_argument("--scheduler_step", help="Scheduler step", type=int, default=3)
@@ -27,6 +29,7 @@ parser.add_argument("--scheduler_gamma", help="Scheduler gamma", type=float, def
 
 parser.add_argument("--upload", help="Upload to wandb", type=bool, default=False)
 parser.add_argument("--upload_interval", help="Upload to wandb every n epochs", type=int, default=10)
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -189,6 +192,8 @@ if __name__ == "__main__":
             upload=args.upload,
             upload_interval=args.upload_interval,
             mask_ratio=args.mask_ratio,
+            context_size=args.context_size,
+            surjection_length=args.surjection_length,
         )
 
         exp = AtomExp(config)

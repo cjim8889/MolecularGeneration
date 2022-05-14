@@ -17,8 +17,11 @@ def create_model_and_optimiser_sche(config):
     elif config['flow'] == "Coupling":
         model = config['model'](t=config['t'], affine=config['affine'])
         model = model.to(device)
-    elif config['flow'] == "AtomFlow" or config['flow'] == "AtomGraph" or config['flow'] == "AtomGraphV2" or config['flow'] == "AtomGraphV3":
+    elif config['flow'] == "AtomFlow" or config['flow'] == "AtomGraph" or config['flow'] == "AtomGraphV2":
         model = config['model'](hidden_dim=config['hidden_dim'], block_length=config['t'])
+        model = model.to(device)
+    elif config['flow'] == "AtomGraphV3":
+        model = config['model'](hidden_dim=config['hidden_dim'], block_length=config['t'], context_size=config['context_size'], surjection_length=config['surjection_length'])
         model = model.to(device)
     else:
         raise ValueError(f"Unknown flow type: {config['flow']}")
