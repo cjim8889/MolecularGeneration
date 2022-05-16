@@ -3,7 +3,9 @@ import torch
 from models.graphflowv3 import AtomGraphFlowV3
 import torch.nn as nn
 from rdkit import Chem
+from rdkit.Chem import Draw
 
+import numpy as np
 
 from utils import get_datasets
 
@@ -62,42 +64,61 @@ if __name__ == "__main__":
     network = AtomGraphFlowV3(
         mask_ratio=9,
         block_length=12,
-        hidden_dim=64
+        hidden_dim=64,
+        surjection_length=4
     )
 
     states = torch.load("v3_12.pt", map_location=device)
 
     network.load_state_dict(states['model_state_dict'])
 
-    at_z = base.sample(sample_shape=(size, 1, 9, 7))
 
-    with torch.no_grad():
-        at, _ = network.inverse(at_z, {
-            "adj": batch.adj,
-            "b_adj": batch.b_adj
-        })
+    idx = 6
+    size = 16
 
-    print(*at[0:5])
-    adj_dense = batch.orig_adj.argmax(-1)
+    output_mols = []
+    output_smiles = []
 
-    mols = [get_mol(at[i], adj_dense[i]) for i in range(at.shape[0])]
+    for i in range(idx):
+        adj = batch.adj[i: i + 1].repeat(size, 1)
+        b_adj = batch.b_adj[i: i + 1].repeat(size, 1, 1)
+        at_z = base.sample(sample_shape=(size, 1, 9, 7))
+        orig_adj = batch.orig_adj[i: i + 1].repeat(size, 1, 1, 1)
 
-    print("processed")
-    t = 0
+        with torch.no_grad():
+            at, _ = network.inverse(at_z, {
+                "adj": adj,
+                "b_adj": b_adj
+            })
+    
+        adj_dense = orig_adj.argmax(-1)
 
-    smiles_list = []
-    for mol in mols:
-        try:
-            Chem.SanitizeMol(mol)
-            smiles = Chem.MolToSmiles(mol)
-            smiles_list.append(smiles)
-            print(f"Chemically Correct Molecule: {smiles}")
-            t += 1
-        except:
-            continue
+        mols = [get_mol(at[j], adj_dense[j]) for j in range(at.shape[0])]
 
-    print(f"Validity: {t / len(mols)}")
-    print(f"U: {len(set(smiles_list)) * 1. / len(smiles_list)}")
+        print(f"processed {i}")
+
+        smiles_list = []
+        valid_mols = []
+        for mol in mols:
+            try:
+                Chem.SanitizeMol(mol)
+                smiles = Chem.MolToSmiles(mol)
+                smiles_list.append(smiles)
+                valid_mols.append(mol)
+
+                print(f"Chemically Correct Molecule: {smiles}")
+            except:
+                continue
+
+        output_mols += valid_mols[:8]
+        output_smiles += smiles_list[:8]
+
+    plot = Draw.MolsToGridImage(output_mols, molsPerRow=8, subImgSize=(500, 500), legends=output_smiles)
+    number = np.random.randint(0, 10000)
+    plot.save(f"local_interpolcation_{number}.png")
+
+    # print(f"Validity: {t / len(mols)}")
+    # print(f"U: {len(set(smiles_list)) * 1. / len(smiles_list)}")
 
 
     # print(at.shape)
