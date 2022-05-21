@@ -96,58 +96,58 @@ def get_smiles_from_loader(loader):
 if __name__ == "__main__":
     batch_size = 128
     batch_number = 6
-    calculate_qm9 = False
+    calculate_qm9 = True
 
     train_loader, test_loadesr = get_datasets(type="mqm9", batch_size=batch_size)
 
-    network = AtomGraphFlowV3(
-        mask_ratio=9,
-        block_length=12,
-        hidden_dim=64,
-        surjection_length=4
-    )
+    # network = AtomGraphFlowV3(
+    #     mask_ratio=9,
+    #     block_length=12,
+    #     hidden_dim=64,
+    #     surjection_length=4
+    # )
 
-    states = torch.load("v3_12.pt", map_location=device)
-    network.load_state_dict(states['model_state_dict'])
+    # states = torch.load("v3_12.pt", map_location=device)
+    # network.load_state_dict(states['model_state_dict'])
     
-    base = torch.distributions.Normal(loc=0., scale=1.)
+    # base = torch.distributions.Normal(loc=0., scale=1.)
 
-    output_mols = []
+    # output_mols = []
 
-    idx = 0
-    for batch in test_loadesr:
-        if idx >= batch_number:
-            break
+    # idx = 0
+    # for batch in test_loadesr:
+    #     if idx >= batch_number:
+    #         break
         
-        at_z = base.sample(sample_shape=(batch_size, 1, 9, 7))
+    #     at_z = base.sample(sample_shape=(batch_size, 1, 9, 7))
 
-        with torch.no_grad():
-            at, _ = network.inverse(at_z, {
-                "adj": batch.adj,
-                "b_adj": batch.b_adj
-            })
+    #     with torch.no_grad():
+    #         at, _ = network.inverse(at_z, {
+    #             "adj": batch.adj,
+    #             "b_adj": batch.b_adj
+    #         })
         
-        adj_dense = batch.orig_adj.argmax(-1)
+    #     adj_dense = batch.orig_adj.argmax(-1)
 
-        mols = [get_mol(at[j], adj_dense[j]) for j in range(at.shape[0])]
-        output_mols += mols
+    #     mols = [get_mol(at[j], adj_dense[j]) for j in range(at.shape[0])]
+    #     output_mols += mols
 
-        print(f"processed batch {idx}")
-        idx += 1
+    #     print(f"processed batch {idx}")
+    #     idx += 1
 
 
-    valid_smiles = []
-    valid_mols = []
+    # valid_smiles = []
+    # valid_mols = []
 
-    for mol in output_mols:
-        if mol[1] is None:
-            continue
+    # for mol in output_mols:
+    #     if mol[1] is None:
+    #         continue
 
-        valid_mols.append(mol[0])
-        valid_smiles.append(mol[1])
+    #     valid_mols.append(mol[0])
+    #     valid_smiles.append(mol[1])
 
-    validity = len(valid_smiles) / len(output_mols)
-    uniqueness = len(set(valid_smiles)) / len(valid_smiles)
+    # validity = len(valid_smiles) / len(output_mols)
+    # uniqueness = len(set(valid_smiles)) / len(valid_smiles)
 
     print("Loading from QM9...")
     mols, smiles = get_smiles_from_loader(train_loader)
@@ -156,20 +156,23 @@ if __name__ == "__main__":
     if calculate_qm9:
         qed_qm9 = [QED.qed(mol) for mol in mols]
         print(f"QED of the QM9: {np.mean(qed_qm9)}")
+        print(f"Max QED of the Generated: {np.max(qed_qm9)}")
+        print(f"90 percentile QED of the Generated: {np.percentile(qed_qm9, 90)}")
 
 
-    unique_smiles = set(smiles)
 
-    novel_smiles = [s for s in valid_smiles if s not in unique_smiles]
+    # unique_smiles = set(smiles)
 
-    qed = [QED.qed(mol) for mol in valid_mols]
+    # novel_smiles = [s for s in valid_smiles if s not in unique_smiles]
 
-    novelty = len(novel_smiles) / len(valid_smiles)
+    # qed = [QED.qed(mol) for mol in valid_mols]
 
-    print(f"Validity: {validity}")
-    print(f"Uniqueness: {uniqueness}")
-    print(f"Novelty: {novelty}")
-    print(f"QED of the Generated: {np.mean(qed)}")
-    print(f"Max QED of the Generated: {np.max(qed)}")
-    print(f"90 percentile QED of the Generated: {np.percentile(qed, 90)}")
+    # novelty = len(novel_smiles) / len(valid_smiles)
+
+    # print(f"Validity: {validity}")
+    # print(f"Uniqueness: {uniqueness}")
+    # print(f"Novelty: {novelty}")
+    # print(f"QED of the Generated: {np.mean(qed)}")
+    # print(f"Max QED of the Generated: {np.max(qed)}")
+    # print(f"90 percentile QED of the Generated: {np.percentile(qed, 90)}")
 

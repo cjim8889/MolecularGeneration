@@ -3,6 +3,7 @@ from models.atomflow import AtomFlow
 from models.atomflow.graphflow import AtomGraphFlow
 from models.graphflowv2 import AtomGraphFlowV2
 from models.graphflowv3 import AtomGraphFlowV3
+from models.graphflowv4 import AtomGraphFlowV4
 from .utils import create_model_and_optimiser_sche, argmax_criterion
 import torch.nn as nn
 import wandb
@@ -23,6 +24,9 @@ class AtomExp:
             self.config['model'] = AtomGraphFlowV2
         elif self.config['flow'] == "AtomGraphV3":
             self.config['model'] = AtomGraphFlowV3
+        elif self.config['flow'] == "AtomGraphV4":
+            self.config['model'] = AtomGraphFlowV4
+            del self.config['weight_init']
         else:
             self.config['flow'] = "AtomFlow" 
             self.config['model'] = AtomFlow
@@ -38,7 +42,7 @@ class AtomExp:
         self.base = torch.distributions.Normal(loc=0., scale=1.)
 
     def train(self):
-        if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3":
+        if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3" or self.config['flow'] == "AtomGraphV4":
             self.network(torch.zeros(1, 9, 2, device=device).long(), {
                 "adj": torch.zeros(1, 45, device=device).long(),
                 "b_adj": torch.zeros(1, 9, 9, device=device).long()
@@ -72,7 +76,7 @@ class AtomExp:
 
                     context = None
 
-                    if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3":
+                    if self.config['flow'] == "AtomGraph" or self.config['flow'] == "AtomGraphV3" or self.config['flow'] == "AtomGraphV4":
                         adj = batch_data.adj.to(device)
                         context = {
                             "adj": adj,
@@ -92,7 +96,6 @@ class AtomExp:
                     loss = argmax_criterion(log_prob, log_det)
                     loss.backward()
 
-                    # nn.utils.clip_gsrad_norm_(self.network.parameters(), 1)
                     self.optimiser.step()
 
                     loss_step += loss
@@ -102,7 +105,6 @@ class AtomExp:
                     step += 1
                     if idx % 5 == 0:
                         ll = (loss_step / 5.).item()
-                        # print(f"Epoch: {epoch}, Step: {idx}, Loss: {ll}")
                         wandb.log({"epoch": epoch, "NLL": ll}, step=step)
 
                         

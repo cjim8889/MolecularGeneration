@@ -11,26 +11,24 @@ from .utils import create_mask
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class AdjContextNet(nn.Module):
-    def __init__(self, context_size=16, num_classes=5, embedding_dim=7, hidden_dim=32):
+    def __init__(self, context_size=16, num_classes=5, embedding_dim=7, max_length=45, hidden_dim=32):
         super(AdjContextNet, self).__init__()
         #Assume input B x 45
         self.net = nn.Sequential(
             nn.Embedding(num_classes, embedding_dim),
-            nn.Linear(embedding_dim, embedding_dim),
+            Rearrange("B N E -> B (N E)"),
+            nn.LazyLinear(max_length * embedding_dim),
             nn.ReLU(),
-            Rearrange("B H E -> B 1 H E"),
+            Rearrange("B (N E) -> B 1 N E", N=max_length, E=embedding_dim),
             # Padding is flaky and requires further investigation 
-            nn.LazyConv2d(hidden_dim, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
             nn.LazyConv2d(hidden_dim, kernel_size=1, stride=1),
             nn.LazyBatchNorm2d(),
             nn.ReLU(),
             nn.LazyConv2d(context_size, kernel_size=1, stride=1),
-            nn.ReLU(), # B x C x 45 x E
+            nn.ReLU(),
         )
 
     def forward(self, x):
-
         return self.net(x)
 
 class ConditionalARNet(nn.Module):
@@ -39,7 +37,6 @@ class ConditionalARNet(nn.Module):
         super().__init__()
         
         self.graph_nets = nn.ModuleList([
-            DenseGCNConv(x_width, x_width),
             DenseGCNConv(x_width, x_width),
         ])
 
@@ -71,13 +68,14 @@ class ConditionalARNet(nn.Module):
 
         z = x.squeeze(1)
 
+
         for graph in self.graph_nets:
             z = graph(z, adj_dense)
 
         return self.net(torch.cat((z.unsqueeze(1), c), dim=1))
 
 
-class AtomGraphFlowV3(nn.Module):
+class AtomGraphFlowV4(nn.Module):
     def __init__(self, context_init=None, mask_ratio=9., block_length=6, surjection_length=4, max_nodes=9, context_size=1, embedding_dim=7, hidden_dim=64, inverted_mask=False) -> None:
         super().__init__()
 
