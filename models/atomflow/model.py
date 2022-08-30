@@ -102,8 +102,6 @@ class AtomFlow(nn.Module):
         if self.context_init is not None:
             context = self.context_init(context)
 
-
-
         for transform in self.transforms:
             if isinstance(transform, ConditionalBijection):
                 x, ldj = transform(x, context)
